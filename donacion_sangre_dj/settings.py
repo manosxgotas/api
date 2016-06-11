@@ -70,9 +70,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
         ),
 
-    'DATE_FORMATS': (
-        '%d/%m/%Y',
-        ),
+    'DATE_FORMAT': '%d/%m/%Y',
 
     'DATE_INPUT_FORMATS': (
         "%d/%m/%Y",
