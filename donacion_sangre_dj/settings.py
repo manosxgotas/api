@@ -65,7 +65,7 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         ),
-    
+
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
         ),
@@ -74,7 +74,9 @@ REST_FRAMEWORK = {
 
     'DATE_INPUT_FORMATS': (
         "%d/%m/%Y",
-        )
+        ),
+    
+    'COERCE_DECIMAL_TO_STRING': False
 }
 
 MIDDLEWARE_CLASSES = [
