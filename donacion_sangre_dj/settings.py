@@ -65,18 +65,18 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         ),
-    
+
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
         ),
 
-    'DATE_FORMATS': (
-        '%d/%m/%Y',
-        ),
+    'DATE_FORMAT': '%d/%m/%Y',
 
     'DATE_INPUT_FORMATS': (
         "%d/%m/%Y",
-        )
+        ),
+    
+    'COERCE_DECIMAL_TO_STRING': False
 }
 
 MIDDLEWARE_CLASSES = [
