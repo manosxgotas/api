@@ -3,8 +3,8 @@ import dj_database_url
 
 from .local import *
 
-DEBUG = False
-TEMPLATE_DEBUG = False
+DEBUG = True
+TEMPLATE_DEBUG = True
 
 # Configuración de la base de datos en entorno local
 DATABASES = {
