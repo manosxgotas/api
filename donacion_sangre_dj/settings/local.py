@@ -16,21 +16,16 @@ import datetime
 
 import psycopg2.extensions
 
-from donacion_sangre_dj.settings_secret import (
-    SECRET_KEY,
-    DATABASE_NAME,
-    DATABASE_USER,
-    DATABASE_PASSWORD,
-    DATABASE_HOST,
-    DATABASE_PORT,
-    )
+from .settings_secret import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.abspath(__file__),'..'),
+    os.path.join(os.path.abspath(__file__),'../..'),
     )
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'asdf')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -38,7 +33,7 @@ PROJECT_ROOT = os.path.abspath(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -53,6 +48,7 @@ INSTALLED_APPS = [
     'app',
     'cuentas',
     'donantes',
+    'direcciones',
 
     'corsheaders',
     'rest_framework',
@@ -75,7 +71,7 @@ REST_FRAMEWORK = {
     'DATE_INPUT_FORMATS': (
         "%d/%m/%Y",
         ),
-    
+
     'COERCE_DECIMAL_TO_STRING': False
 }
 
@@ -111,21 +107,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'donacion_sangre_dj.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DATABASE_NAME,
-        'USER': DATABASE_USER,
-        'PASSWORD': DATABASE_PASSWORD,
-        'HOST': DATABASE_HOST,
-        'PORT': DATABASE_PORT,
-    }
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
+        }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -145,37 +139,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 JWT_AUTH = {
-
     'JWT_SECRET_KEY': SECRET_KEY,
     'JWT_ALGORITHM': 'HS256',
     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=7),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
 
     'JWT_VERIFY': True,
-    # 'JWT_ENCODE_HANDLER':
-    # 'rest_framework_jwt.utils.jwt_encode_handler',
-
-    # 'JWT_DECODE_HANDLER':
-    # 'rest_framework_jwt.utils.jwt_decode_handler',
-
-    # 'JWT_PAYLOAD_HANDLER':
-    # 'rest_framework_jwt.utils.jwt_payload_handler',
-
-    # 'JWT_PAYLOAD_GET_USER_ID_HANDLER':
-    # 'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
-
-    # 'JWT_RESPONSE_PAYLOAD_HANDLER':
-    # 'rest_framework_jwt.utils.jwt_response_payload_handler',
-
-    # 'JWT_VERIFY_EXPIRATION': True,
-    # 'JWT_LEEWAY': 0,
-    # 'JWT_AUDIENCE': None,
-    # 'JWT_ISSUER': None,
-
-    # 'JWT_ALLOW_REFRESH': False,
-    # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
 
 # Internationalization
@@ -190,7 +160,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -207,10 +176,3 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
-
-
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_HSTS_SECONDS = 3600
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True

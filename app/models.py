@@ -1,6 +1,6 @@
 import os
 
-from donacion_sangre_dj.settings import MEDIA_ROOT
+from donacion_sangre_dj.settings.local import MEDIA_ROOT
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -14,7 +14,7 @@ DIAS_SEMANA = {
     '3' : _(u'Miércoles'),
     '4' : _(u'Jueves'),
     '5' : _(u'Viernes'),
-    '6' : _(u'Sábado'), 
+    '6' : _(u'Sábado'),
     '7' : _(u'Domingo'),
 }
 
@@ -34,13 +34,13 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
 class GenerosField(models.CharField):
     def __init__(self, *args, **kwargs):
         kwargs['choices']=tuple(sorted(GENEROS.items()))
-        kwargs['max_length']=1 
-        super(GenerosField,self).__init__(*args, **kwargs) 
+        kwargs['max_length']=1
+        super(GenerosField,self).__init__(*args, **kwargs)
 
 class DiasSemanaField(models.CharField):
     def __init__(self, *args, **kwargs):
         kwargs['choices']=tuple(sorted(DIAS_SEMANA.items()))
-        kwargs['max_length']=1 
+        kwargs['max_length']=1
         super(DiasSemanaField,self).__init__(*args, **kwargs)
 
 class Donante(models.Model):
@@ -274,7 +274,7 @@ class Paciente(models.Model):
     apellido = models.CharField(max_length=50)
     email = models.EmailField()
     nacimiento = models.DateField(verbose_name='fecha de nacimiento')
-    telefono = models.CharField(max_length=20, verbose_name='teléfono')    
+    telefono = models.CharField(max_length=20, verbose_name='teléfono')
     genero = GenerosField()
     direccion = models.ForeignKey('Direccion', verbose_name='dirección')
 

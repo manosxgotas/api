@@ -1,0 +1,1 @@
+web: gunicorn donacion_sangre_dj.wsgi --log-file -
