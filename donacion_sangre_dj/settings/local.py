@@ -16,6 +16,8 @@ import datetime
 
 import psycopg2.extensions
 
+from .settings_secret import *
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -111,11 +113,11 @@ WSGI_APPLICATION = 'donacion_sangre_dj.wsgi.application'
 DATABASES = {
     'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'postgresdb',
-            'USER': 'postgres',
-            'PASSWORD': '1234',
-            'HOST': '127.0.0.1',
-            'PORT': '5432',
+            'NAME': DB_NAME,
+            'USER': DB_USER,
+            'PASSWORD': DB_PASSWORD,
+            'HOST': DB_HOST,
+            'PORT': DB_PORT,
         }
 }
 
