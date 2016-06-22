@@ -1,0 +1,19 @@
+language: python
+
+python:
+  - 3.4
+
+services:
+  - postgresql
+
+before_install:
+  - export DJANGO_SETTINGS_MODULE=manosxgotas.settings.travis
+
+install:
+  - pip install -r requirements.txt
+
+before_script:
+  - psql -c 'CREATE DATABASE travis_donacion;' -U postgres
+
+script:
+  - python manage.py migrate
