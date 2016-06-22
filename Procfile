@@ -1,1 +1,1 @@
-web: gunicorn donacion_sangre_dj.wsgi --log-file -
+web: gunicorn manosxgotas.wsgi --log-file -
