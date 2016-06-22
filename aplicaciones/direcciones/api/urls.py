@@ -1,9 +1,9 @@
 from django.conf.urls import include, url
 
 from .views import (
-	ProvinciaListAPI,
-	LocalidadListAPI,
-	)
+    ProvinciaListAPI,
+    LocalidadListAPI,
+    )
 
 urlpatterns = [
     url(r'^listado-provincias/$', ProvinciaListAPI.as_view() , name='listado-provincias'),

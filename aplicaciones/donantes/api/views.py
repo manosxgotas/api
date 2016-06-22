@@ -4,7 +4,7 @@ from rest_framework.generics import (
     UpdateAPIView,
     )
 
-from app.api.permissions import IsOwner
+from aplicaciones.base.api.permissions import IsOwner
 
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
@@ -13,7 +13,7 @@ from rest_framework.views import APIView
 
 from django.contrib.auth import get_user_model
 
-from app.models import (
+from aplicaciones.base.models import (
     Donante,
     )
 

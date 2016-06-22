@@ -1,6 +1,6 @@
 import os
 
-from donacion_sangre_dj.settings.local import MEDIA_ROOT
+from manosxgotas.settings.local import MEDIA_ROOT
 
 from django.db import models
 from django.contrib.auth.models import User

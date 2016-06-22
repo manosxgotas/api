@@ -6,8 +6,8 @@ from rest_framework.serializers import (
     ModelField,
     IntegerField
     )
-from app.models import (
-    Donante, 
+from aplicaciones.base.models import (
+    Donante,
     RegistroDonacion,
     Direccion,
     Localidad,

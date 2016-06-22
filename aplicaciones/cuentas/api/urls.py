@@ -1,13 +1,13 @@
 from rest_framework_jwt.views import (
-	obtain_jwt_token,
-	verify_jwt_token,
-	)
+    obtain_jwt_token,
+    verify_jwt_token,
+    )
 from django.conf.urls import url
 
 from .views import (
-	DonanteRegistroAPI, 
-	UsuarioLoginAPI,
-	)
+    DonanteRegistroAPI,
+    UsuarioLoginAPI,
+    )
 
 urlpatterns = [
 

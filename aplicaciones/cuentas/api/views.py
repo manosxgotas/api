@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 
 
-from app.models import (
+from aplicaciones.base.models import (
     Donante,
     )
 
