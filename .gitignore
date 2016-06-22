@@ -1,6 +1,10 @@
 db.sqlite3
-static/
-media/
+
+*/static/*
+!*/static/.gitkeep
+
+*/media/*
+!*/media/.gitkeep
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
