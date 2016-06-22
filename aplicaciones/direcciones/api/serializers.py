@@ -2,7 +2,7 @@ from rest_framework.serializers import (
     ModelSerializer,
     )
 
-from app.models import (
+from aplicaciones.base.models import (
     Provincia,
     Localidad
     )

@@ -1,11 +1,11 @@
 from django.shortcuts import render
 
 from .serializers import (
-	DonanteSerializer, 
-	GrupoSanguineoSerializer, 
-	)
+    DonanteSerializer,
+    GrupoSanguineoSerializer,
+    )
 
-from app.models import Donante, GrupoSanguineo
+from aplicaciones.base.models import Donante, GrupoSanguineo
 
 from rest_framework.generics import ListAPIView, CreateAPIView
 
@@ -18,11 +18,11 @@ from rest_framework.views import APIView
 from django.contrib.auth import get_user_model
 
 class DonanteListAPI(ListAPIView):
-    
+
     queryset = Donante.objects.all()
     serializer_class = DonanteSerializer
 
 class GrupoSanguineoListAPI(ListAPIView):
-    
+
     queryset = GrupoSanguineo.objects.all()
     serializer_class = GrupoSanguineoSerializer

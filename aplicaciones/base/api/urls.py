@@ -16,14 +16,14 @@ Including another URLconf
 from django.conf.urls import include, url
 
 from .views import (
-	DonanteListAPI, 
-	GrupoSanguineoListAPI,
-	)
+    DonanteListAPI,
+    GrupoSanguineoListAPI,
+    )
 
 urlpatterns = [
     url(r'^listado-donantes/$', DonanteListAPI.as_view() , name='listado-donantes'),
-    url(r'^cuentas/', include('cuentas.api.urls', namespace='cuentas')),
-    url(r'^donantes/', include('donantes.api.urls', namespace='donantes')),
-    url(r'^direcciones/', include('direcciones.api.urls', namespace='direcciones')),
+    url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
+    url(r'^donantes/', include('aplicaciones.donantes.api.urls', namespace='donantes')),
+    url(r'^direcciones/', include('aplicaciones.direcciones.api.urls', namespace='direcciones')),
 
 ]

@@ -5,8 +5,8 @@ from rest_framework.serializers import (
     CharField,
     ModelField,
     )
-from app.models import (
-    Donante, 
+from aplicaciones.base.models import (
+    Donante,
     Direccion,
     RegistroDonacion,
     GENEROS,
@@ -69,14 +69,14 @@ class DonanteRegistroSerializer(ModelSerializer):
         altura = validated_data['altura']
         genero = validated_data['genero']
         slug = slugify(validated_data['usuario']['username'])
-        
+
         grupoSanguineo = validated_data['grupoSanguineo']
 
         usuario_data = validated_data.pop('usuario')
         usuario = User(**usuario_data)
         usuario.set_password(usuario_data['password'])
         usuario.save()
-        
+
         direccion_data = validated_data.pop('direccion')
         direccion = Direccion(**direccion_data)
         direccion.save()
@@ -123,8 +123,8 @@ class UsuarioLoginSerializer(ModelSerializer):
         if user_obj:
             if not user_obj.check_password(password):
                 raise ValidationError("La contraseña es incorrecta, intente de nuevo.")
-        
+
             # else:
             #     data["token"] = "TOKEN GENERADO"
-        
+
         return data

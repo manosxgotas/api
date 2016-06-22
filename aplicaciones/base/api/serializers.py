@@ -5,9 +5,9 @@ from rest_framework.serializers import (
     CharField,
     ModelField,
     )
-from app.models import (
-    Donante, 
-    GrupoSanguineo, 
+from aplicaciones.base.models import (
+    Donante,
+    GrupoSanguineo,
     Direccion,
     RegistroDonacion,
     )
