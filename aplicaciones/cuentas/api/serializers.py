@@ -1,21 +1,14 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    EmailField,
     ValidationError,
-    CharField,
-    ModelField,
     )
 from aplicaciones.base.models import (
     Donante,
     Direccion,
     RegistroDonacion,
-    GENEROS,
     )
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-from django.utils.text import slugify
-
 
 class DireccionRegistroSerializer(ModelSerializer):
 
