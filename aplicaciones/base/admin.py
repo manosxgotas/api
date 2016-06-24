@@ -14,4 +14,6 @@ admin.site.register(Evento)
 admin.site.register(Direccion)
 admin.site.register(Localidad)
 admin.site.register(Provincia)
+admin.site.register(Nacionalidad)
+admin.site.register(TipoDocumento)
 

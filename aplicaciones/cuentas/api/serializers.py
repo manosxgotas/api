@@ -1,21 +1,14 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    EmailField,
     ValidationError,
-    CharField,
-    ModelField,
     )
 from aplicaciones.base.models import (
     Donante,
     Direccion,
     RegistroDonacion,
-    GENEROS,
     )
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
-from django.utils.text import slugify
-
 
 class DireccionRegistroSerializer(ModelSerializer):
 
@@ -53,6 +46,8 @@ class DonanteRegistroSerializer(ModelSerializer):
         model = Donante
         fields = [
         'usuario',
+        'numeroDocumento',
+        'tipoDocumento',
         'nacimiento',
         'telefono',
         'peso',
@@ -60,30 +55,39 @@ class DonanteRegistroSerializer(ModelSerializer):
         'genero',
         'grupoSanguineo',
         'direccion',
+        'nacionalidad'
         ]
 
     def create(self, validated_data):
+
+        # Obtención de datos del donante
+        numeroDocumento = validated_data['numeroDocumento']
+        tipoDocumento = validated_data['tipoDocumento']
         nacimiento = validated_data['nacimiento']
         telefono = validated_data['telefono']
         peso = validated_data['peso']
         altura = validated_data['altura']
         genero = validated_data['genero']
-        slug = slugify(validated_data['usuario']['username'])
+        grupoSanguineo = validated_data.get('grupoSanguineo', None)
+        nacionalidad = validated_data['nacionalidad']
 
-        grupoSanguineo = validated_data['grupoSanguineo']
-
+        # Obtención de datos del usuario
         usuario_data = validated_data.pop('usuario')
         usuario = User(**usuario_data)
+        # Seteo la password mediante el método set_password para que la misma sea encriptada
         usuario.set_password(usuario_data['password'])
         usuario.save()
 
+        # Obtención de los datos de la dirección
         direccion_data = validated_data.pop('direccion')
         direccion = Direccion(**direccion_data)
         direccion.save()
 
+        # Creación de la instancia de Donante
         donante_obj = Donante.objects.create(
             usuario = usuario,
-            slug = slug,
+            numeroDocumento = numeroDocumento,
+            tipoDocumento = tipoDocumento,
             nacimiento = nacimiento,
             telefono = telefono,
             peso = peso,
@@ -91,40 +95,10 @@ class DonanteRegistroSerializer(ModelSerializer):
             genero = genero,
             grupoSanguineo = grupoSanguineo,
             direccion = direccion,
+            nacionalidad = nacionalidad
             )
 
-
+        # Creación de instancia de Registro de donación asociada con la instancia de Donante
         RegistroDonacion.objects.create(donante=donante_obj)
 
         return donante_obj
-
-class UsuarioLoginSerializer(ModelSerializer):
-    # token = CharField(allow_blank=True, read_only=True)
-    username = CharField(allow_blank=True, required=False)
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'password',
-            # 'token',
-        ]
-
-    def validate(self, data):
-        user_obj = None
-        username = data["username"]
-        password = data["password"]
-        user = User.objects.filter(Q(username=username))
-
-        if user.exists():
-            user_obj = user.first()
-        else:
-            raise ValidationError("El usuario no existe.")
-
-        if user_obj:
-            if not user_obj.check_password(password):
-                raise ValidationError("La contraseña es incorrecta, intente de nuevo.")
-
-            # else:
-            #     data["token"] = "TOKEN GENERADO"
-
-        return data

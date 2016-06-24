@@ -24,7 +24,7 @@ GENEROS = {
 }
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
-    # Almacena la imágen en: 'media/donantes/fotos/<nombre donante>.<extension>' si es donante
+    # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>' si es donante
     if (isinstance(instance, Donante)):
         ruta_imagenes_ubicacion = 'donantes/fotos/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
@@ -45,7 +45,8 @@ class DiasSemanaField(models.CharField):
 
 class Donante(models.Model):
     usuario = models.ForeignKey(User)
-    slug = models.SlugField(unique=True)
+    numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento')
+    tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento')
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
     telefono = models.CharField(max_length=20, verbose_name='teléfono')
     nacimiento = models.DateField(verbose_name='fecha de nacimiento')
@@ -54,12 +55,33 @@ class Donante(models.Model):
     genero = GenerosField(verbose_name='género')
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', null=True, verbose_name='grupo sanguíneo')
     direccion = models.ForeignKey('Direccion', verbose_name='dirección')
+    nacionalidad = models.ForeignKey('Nacionalidad')
 
     def get_genero(self):
         return GENEROS.get(self.genero)
 
     def __str__(self):
         return self.usuario.username
+
+class Nacionalidad(models.Model):
+    nombre = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name_plural = 'nacionalidades'
+
+class TipoDocumento(models.Model):
+    siglas = models.CharField(max_length=20)
+    descripcion = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.siglas
+
+    class Meta:
+        verbose_name = 'tipo de documento'
+        verbose_name_plural = 'tipos de documento'
 
 class Direccion(models.Model):
     calle = models.CharField(max_length=50)

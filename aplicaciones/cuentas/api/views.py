@@ -15,7 +15,6 @@ from aplicaciones.base.models import (
 
 from .serializers import (
     DonanteRegistroSerializer,
-    UsuarioLoginSerializer,
     )
 
 class DonanteRegistroAPI(CreateAPIView):
@@ -23,16 +22,3 @@ class DonanteRegistroAPI(CreateAPIView):
     permission_classes = [AllowAny]
     queryset = Donante.objects.all()
     serializer_class = DonanteRegistroSerializer
-
-class UsuarioLoginAPI(APIView):
-
-    permission_classes = [AllowAny]
-    serializer_class = UsuarioLoginSerializer
-
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        serializer = UsuarioLoginSerializer(data=data)
-        if serializer.is_valid(raise_exception=True):
-            new_data = serializer.data
-            return Response(new_data, status=HTTP_200_OK)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
