@@ -109,6 +109,8 @@ class DonanteUpdateSerializer(ModelSerializer):
         model = Donante
         fields = [
         'usuario',
+        'numeroDocumento',
+        'tipoDocumento',
         'foto',
         'nacimiento',
         'telefono',
@@ -117,15 +119,19 @@ class DonanteUpdateSerializer(ModelSerializer):
         'genero',
         'grupoSanguineo',
         'direccion',
+        'nacionalidad'
         ]
 
     def update(self, instance, validated_data):
+        instance.numeroDocumento = validated_data.get('numeroDocumento', instance.numeroDocumento)
+        instance.tipoDocumento = validated_data.get('tipoDocumento', instance.tipoDocumento)
         instance.nacimiento = validated_data.get('nacimiento', instance.nacimiento)
         instance.telefono = validated_data.get('telefono', instance.telefono)
         instance.peso = validated_data.get('peso', instance.peso)
         instance.altura = validated_data.get('altura', instance.altura)
         instance.genero = validated_data.get('genero', instance.genero)
         instance.grupoSanguineo = validated_data.get('grupoSanguineo', instance.grupoSanguineo)
+        instance.nacionalidad = validated_data.get('nacionalidad', instance.nacionalidad)
 
         instance.save()
 
