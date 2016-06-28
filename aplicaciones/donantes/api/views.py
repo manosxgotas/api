@@ -6,12 +6,9 @@ from rest_framework.generics import (
 
 from aplicaciones.base.api.permissions import IsOwner
 
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
-
-from django.contrib.auth import get_user_model
+from rest_framework.decorators import parser_classes
+from rest_framework.parsers import FormParser, MultiPartParser
 
 from aplicaciones.base.models import (
     Donante,
@@ -20,6 +17,7 @@ from aplicaciones.base.models import (
 from .serializers import (
     DonantePerfilSerializer,
     DonanteUpdateSerializer,
+    DonanteAvatarSerializer,
     )
 
 class DonantePerfilAPI(RetrieveAPIView):
@@ -31,5 +29,12 @@ class DonantePerfilAPI(RetrieveAPIView):
 class DonanteUpdateAPI(UpdateAPIView):
     permission_classes = [IsOwner]
     serializer_class = DonanteUpdateSerializer
+    queryset = Donante.objects.all()
+    lookup_field = 'usuario_id'
+
+class DonanteUpdateAvatarAPI(UpdateAPIView):
+    permission_classes = [IsOwner]
+    parser_classes = [FormParser, MultiPartParser]
+    serializer_class = DonanteAvatarSerializer
     queryset = Donante.objects.all()
     lookup_field = 'usuario_id'
