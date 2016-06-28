@@ -1,9 +1,6 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    EmailField,
     ValidationError,
-    CharField,
-    ModelField,
     IntegerField
     )
 from aplicaciones.base.models import (
@@ -62,6 +59,8 @@ class DonantePerfilSerializer(ModelSerializer):
         model = Donante
         fields = [
         'usuario',
+        'numeroDocumento',
+        'tipoDocumento',
         'foto',
         'nacimiento',
         'telefono',
@@ -70,6 +69,7 @@ class DonantePerfilSerializer(ModelSerializer):
         'genero',
         'grupoSanguineo',
         'direccion',
+        'nacionalidad'
         ]
 
 class UsuarioUpdateSerializer(ModelSerializer):
@@ -111,7 +111,6 @@ class DonanteUpdateSerializer(ModelSerializer):
         'usuario',
         'numeroDocumento',
         'tipoDocumento',
-        'foto',
         'nacimiento',
         'telefono',
         'peso',
@@ -164,3 +163,16 @@ class DonanteUpdateSerializer(ModelSerializer):
         direccion.save()
 
         return instance
+
+class DonanteAvatarSerializer(ModelSerializer):
+    class Meta:
+        model = Donante
+        fields = ['foto']
+
+    def update(self, instance, validated_data):
+        instance.foto.delete()
+        instance.foto = validated_data['foto']
+        instance.save()
+
+        return instance
+
