@@ -1,4 +1,4 @@
-import os
+import os, datetime
 
 from manosxgotas.settings.local import MEDIA_ROOT
 
@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 DIAS_SEMANA = {
@@ -22,6 +23,10 @@ GENEROS = {
     '1' : _(u'Hombre'),
     '2' : _(u'Mujer'),
 }
+
+def validate_fecha_hora_futuro(value):
+    if value >= datetime.datetime.now():
+        raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
     # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>' si es donante
@@ -127,7 +132,7 @@ class GrupoSanguineo(models.Model):
 
 class RegistroDonacion(models.Model):
     privado = models.BooleanField(default=True)
-    donante = models.OneToOneField('Donante')
+    donante = models.OneToOneField('Donante', related_name='registro')
 
     def __str__(self):
         return 'Registro de donación de ' + self.donante.usuario.username
@@ -137,16 +142,16 @@ class RegistroDonacion(models.Model):
         verbose_name_plural = 'registros de donación'
 
 class DetalleRegistroDonacion(models.Model):
-    fechaHora = models.DateTimeField(verbose_name='fecha y hora')
+    fechaHora = models.DateTimeField(verbose_name='fecha y hora', validators=[validate_fecha_hora_futuro])
     foto = models.ImageField(blank=True)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
-    registro = models.ForeignKey('RegistroDonacion', verbose_name='registro de donación')
+    registro = models.ForeignKey('RegistroDonacion', related_name='detalles', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('Verificacion', blank=True, null=True, verbose_name='verificación')
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
 
     def __str__(self):
-        return self.registro.__str__ + '-' + self.id
+        return self.registro.__str__() + ' - ' + str(self.id)
 
     class Meta:
         verbose_name = 'detalle del registro de donación'
