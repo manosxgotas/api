@@ -10,8 +10,7 @@ from aplicaciones.base.models import (
     GrupoSanguineo,
     )
 
-from aplicaciones.registros_donacion.api.serializers import (
-    DetalleRegistroDonacionSerializer,
+from aplicaciones.donaciones.api.serializers import (
     RegistroDonacionSerializer
     )
 

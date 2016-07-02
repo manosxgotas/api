@@ -33,6 +33,6 @@ urlpatterns = [
     url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
     url(r'^donantes/', include('aplicaciones.donantes.api.urls', namespace='donantes')),
     url(r'^direcciones/', include('aplicaciones.direcciones.api.urls', namespace='direcciones')),
-    url(r'^registros-donacion/', include('aplicaciones.registros_donacion.api.urls', namespace='registros-donacion')),
+    url(r'^donaciones/', include('aplicaciones.donaciones.api.urls', namespace='donaciones')),
 
 ]
