@@ -141,11 +141,11 @@ class RegistroDonacion(models.Model):
         verbose_name = 'registro de donación'
         verbose_name_plural = 'registros de donación'
 
-class DetalleRegistroDonacion(models.Model):
+class Donacion(models.Model):
     fechaHora = models.DateTimeField(verbose_name='fecha y hora', validators=[validate_fecha_hora_futuro])
     foto = models.ImageField(blank=True)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
-    registro = models.ForeignKey('RegistroDonacion', related_name='detalles', verbose_name='registro de donación')
+    registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('Verificacion', blank=True, null=True, verbose_name='verificación')
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
@@ -154,8 +154,8 @@ class DetalleRegistroDonacion(models.Model):
         return 'Donación de ' + self.registro.donante.__str__() + ' - ' + str(self.fechaHora)
 
     class Meta:
-        verbose_name = 'detalle del registro de donación'
-        verbose_name_plural = 'detalles del registro de donación'
+        verbose_name = 'donación'
+        verbose_name_plural = 'donaciones'
 
 class EstadoDonacion(models.Model):
     nombre = models.CharField(max_length=50)
@@ -171,7 +171,7 @@ class EstadoDonacion(models.Model):
 class HistoricoEstadoDonacion(models.Model):
     inicio = models.DateTimeField()
     fin = models.DateTimeField(null = True, blank = True)
-    donacion = models.ForeignKey('DetalleRegistroDonacion', related_name='historicoEstados')
+    donacion = models.ForeignKey('Donacion', related_name='historicoEstados')
     estado = models.ForeignKey('EstadoDonacion')
 
     def __str__(self):
