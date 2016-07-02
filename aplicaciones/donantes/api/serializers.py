@@ -5,10 +5,14 @@ from rest_framework.serializers import (
     )
 from aplicaciones.base.models import (
     Donante,
-    RegistroDonacion,
     Direccion,
     Localidad,
     GrupoSanguineo,
+    )
+
+from aplicaciones.registros_donacion.api.serializers import (
+    DetalleRegistroDonacionSerializer,
+    RegistroDonacionSerializer
     )
 
 from django.contrib.auth import get_user_model
@@ -55,6 +59,7 @@ class DonantePerfilSerializer(ModelSerializer):
     usuario = UsuarioPerfilSerializer()
     direccion = DireccionPerfilSerializer()
     grupoSanguineo = GrupoSanguineoPerfilSerializer()
+    registro = RegistroDonacionSerializer()
     class Meta:
         model = Donante
         fields = [
@@ -69,7 +74,8 @@ class DonantePerfilSerializer(ModelSerializer):
         'genero',
         'grupoSanguineo',
         'direccion',
-        'nacionalidad'
+        'nacionalidad',
+        'registro'
         ]
 
 class UsuarioUpdateSerializer(ModelSerializer):
