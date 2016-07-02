@@ -25,7 +25,7 @@ GENEROS = {
 }
 
 def validate_fecha_hora_futuro(value):
-    if value >= datetime.datetime.now():
+    if value > datetime.datetime.now():
         raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
@@ -151,16 +151,39 @@ class DetalleRegistroDonacion(models.Model):
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
 
     def __str__(self):
-        return self.registro.__str__() + ' - ' + str(self.id)
+        return 'Donación de ' + self.registro.donante.__str__() + ' - ' + str(self.fechaHora)
 
     class Meta:
         verbose_name = 'detalle del registro de donación'
         verbose_name_plural = 'detalles del registro de donación'
 
+class EstadoDonacion(models.Model):
+    nombre = models.CharField(max_length=50)
+    descripcion = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = 'estado de la donación'
+        verbose_name_plural = 'estados de la donación'
+
+class HistoricoEstadoDonacion(models.Model):
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField(null = True, blank = True)
+    donacion = models.ForeignKey('DetalleRegistroDonacion', related_name='historicoEstados')
+    estado = models.ForeignKey('EstadoDonacion')
+
+    def __str__(self):
+        return 'Histórico ' + str(self.id)
+
+    class Meta:
+        verbose_name = 'histórico de estados de donación'
+        verbose_name_plural = 'históricos de estados de donación'
+
 class Verificacion(models.Model):
     imagen = models.ImageField()
     codigo = models.CharField(max_length=20, verbose_name='código')
-    aceptado = models.BooleanField()
 
     class Meta:
         verbose_name = 'verificación'
