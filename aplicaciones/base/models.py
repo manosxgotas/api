@@ -32,6 +32,10 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>' si es donante
     if (isinstance(instance, Donante)):
         ruta_imagenes_ubicacion = 'donantes/fotos/'
+    # Almacena la imágen en: 'media/donaciones/<nombre usuario>/<str donacion>.<extension>' si es una donación
+    if (isinstance(instance, Donacion)):
+        owner = str(instance.registro.donante)
+        ruta_imagenes_ubicacion = 'donaciones/' + owner + '/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen= '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -143,7 +147,7 @@ class RegistroDonacion(models.Model):
 
 class Donacion(models.Model):
     fechaHora = models.DateTimeField(verbose_name='fecha y hora', validators=[validate_fecha_hora_futuro])
-    foto = models.ImageField(blank=True)
+    foto = models.ImageField(blank=True, upload_to=establecer_destino_imagen_ubicacion)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
@@ -151,7 +155,7 @@ class Donacion(models.Model):
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
 
     def __str__(self):
-        return 'Donación de ' + self.registro.donante.__str__() + ' - ' + str(self.fechaHora)
+        return 'Donación de ' + str(self.registro.donante) + ' - ' + str(self.fechaHora)
 
     class Meta:
         verbose_name = 'donación'
