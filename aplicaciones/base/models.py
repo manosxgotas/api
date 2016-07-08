@@ -1,4 +1,4 @@
-import os
+import os, datetime
 
 from manosxgotas.settings.local import MEDIA_ROOT
 
@@ -6,6 +6,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 DIAS_SEMANA = {
@@ -23,10 +24,18 @@ GENEROS = {
     '2' : _(u'Mujer'),
 }
 
+def validate_fecha_hora_futuro(value):
+    if value > datetime.datetime.now():
+        raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
+
 def establecer_destino_imagen_ubicacion(instance, imagename):
     # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>' si es donante
     if (isinstance(instance, Donante)):
         ruta_imagenes_ubicacion = 'donantes/fotos/'
+    # Almacena la imágen en: 'media/donaciones/<nombre usuario>/<str donacion>.<extension>' si es una donación
+    if (isinstance(instance, Donacion)):
+        owner = str(instance.registro.donante)
+        ruta_imagenes_ubicacion = 'donaciones/' + owner + '/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen= '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -127,7 +136,7 @@ class GrupoSanguineo(models.Model):
 
 class RegistroDonacion(models.Model):
     privado = models.BooleanField(default=True)
-    donante = models.OneToOneField('Donante')
+    donante = models.OneToOneField('Donante', related_name='registro')
 
     def __str__(self):
         return 'Registro de donación de ' + self.donante.usuario.username
@@ -136,26 +145,49 @@ class RegistroDonacion(models.Model):
         verbose_name = 'registro de donación'
         verbose_name_plural = 'registros de donación'
 
-class DetalleRegistroDonacion(models.Model):
-    fechaHora = models.DateTimeField(verbose_name='fecha y hora')
-    foto = models.ImageField(blank=True)
+class Donacion(models.Model):
+    fechaHora = models.DateTimeField(verbose_name='fecha y hora', validators=[validate_fecha_hora_futuro])
+    foto = models.ImageField(blank=True, upload_to=establecer_destino_imagen_ubicacion)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
-    registro = models.ForeignKey('RegistroDonacion', verbose_name='registro de donación')
+    registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('Verificacion', blank=True, null=True, verbose_name='verificación')
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
 
     def __str__(self):
-        return self.registro.__str__ + '-' + self.id
+        return 'Donación de ' + str(self.registro.donante) + ' - ' + str(self.fechaHora)
 
     class Meta:
-        verbose_name = 'detalle del registro de donación'
-        verbose_name_plural = 'detalles del registro de donación'
+        verbose_name = 'donación'
+        verbose_name_plural = 'donaciones'
+
+class EstadoDonacion(models.Model):
+    nombre = models.CharField(max_length=50)
+    descripcion = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = 'estado de la donación'
+        verbose_name_plural = 'estados de la donación'
+
+class HistoricoEstadoDonacion(models.Model):
+    inicio = models.DateTimeField()
+    fin = models.DateTimeField(null = True, blank = True)
+    donacion = models.ForeignKey('Donacion', related_name='historicoEstados')
+    estado = models.ForeignKey('EstadoDonacion')
+
+    def __str__(self):
+        return 'Histórico ' + str(self.id)
+
+    class Meta:
+        verbose_name = 'histórico de estados de donación'
+        verbose_name_plural = 'históricos de estados de donación'
 
 class Verificacion(models.Model):
     imagen = models.ImageField()
     codigo = models.CharField(max_length=20, verbose_name='código')
-    aceptado = models.BooleanField()
 
     class Meta:
         verbose_name = 'verificación'
