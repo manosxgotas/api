@@ -9,10 +9,26 @@ from rest_framework.validators import ValidationError
 from aplicaciones.base.models import (
     RegistroDonacion,
     Donacion,
-    EstadoDonacion
+    EstadoDonacion,
+    HistoricoEstadoDonacion
     )
 
 class DonacionSerializer(ModelSerializer):
+    class Meta:
+        model = Donacion
+        depth = 2
+        fields = [
+        'id',
+        'fechaHora',
+        'registro',
+        'foto',
+        'evento',
+        'verificacion',
+        'centroDonacion',
+        'historicoEstados'
+        ]
+
+class DonacionAltaSerializer(ModelSerializer):
     class Meta:
         model = Donacion
         fields = '__all__'
