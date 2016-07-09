@@ -13,7 +13,7 @@ from aplicaciones.base.models import (
     HistoricoEstadoDonacion
     )
 
-class DonacionSerializer(ModelSerializer):
+class DonacionPerfilSerializer(ModelSerializer):
     class Meta:
         model = Donacion
         depth = 2
@@ -28,7 +28,7 @@ class DonacionSerializer(ModelSerializer):
         'historicoEstados'
         ]
 
-class DonacionAltaSerializer(ModelSerializer):
+class DonacionABMSerializer(ModelSerializer):
     class Meta:
         model = Donacion
         fields = '__all__'
@@ -54,7 +54,7 @@ class DonacionAltaSerializer(ModelSerializer):
         return donacion
 
 class RegistroDonacionSerializer(ModelSerializer):
-    donaciones = DonacionSerializer(many=True)
+    donaciones = DonacionPerfilSerializer(many=True)
     depth = 1
     class Meta:
         model = RegistroDonacion
