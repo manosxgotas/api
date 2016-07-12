@@ -1,12 +1,17 @@
 from django.conf.urls import url
 
 from .views import (
-    DonacionAltaAPI,
-    DonacionEliminarAPI
+    DonacionCreateAPI,
+    DonacionUpdateAPI,
+    DonacionDestroyAPI,
+    DonacionInfoAPI
     )
 
 
 urlpatterns = [
-    url(r'^crear/$', DonacionAltaAPI.as_view() , name='alta-donacion'),
-    url(r'^eliminar/(?P<id>\w+)$', DonacionEliminarAPI.as_view() , name='eliminar-donacion'),
+
+    url(r'^crear/$', DonacionCreateAPI.as_view() , name='crear-donacion'),
+    url(r'^editar/(?P<id>\w+)$', DonacionUpdateAPI.as_view() , name='editar-donacion'),
+    url(r'^eliminar/(?P<id>\w+)$', DonacionDestroyAPI.as_view() , name='eliminar-donacion'),
+    url(r'^(?P<id>\w+)$', DonacionInfoAPI.as_view() , name='info-donacion'),
 ]
