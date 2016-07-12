@@ -13,22 +13,7 @@ from aplicaciones.base.models import (
     HistoricoEstadoDonacion
     )
 
-class DonacionPerfilSerializer(ModelSerializer):
-    class Meta:
-        model = Donacion
-        depth = 2
-        fields = [
-        'id',
-        'fechaHora',
-        'registro',
-        'foto',
-        'evento',
-        'verificacion',
-        'centroDonacion',
-        'historicoEstados'
-        ]
-
-class DonacionABMSerializer(ModelSerializer):
+class DonacionCreateSerializer(ModelSerializer):
     class Meta:
         model = Donacion
         fields = '__all__'
@@ -52,6 +37,49 @@ class DonacionABMSerializer(ModelSerializer):
         historico.save()
 
         return donacion
+
+class DonacionUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Donacion
+        fields = [
+        'fechaHora',
+        'foto',
+        'descripcion',
+        'evento',
+        'centroDonacion'
+        ]
+
+    def update(self, instance, validated_data):
+        instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
+        instance.centroDonacion = validated_data.get('centroDonacion', instance.centroDonacion)
+        instance.evento = validated_data.get('evento', instance.evento)
+        instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+        foto_nueva = validated_data.get('foto', None)
+
+        if foto_nueva != None:
+            try:
+                instance.foto.delete()
+            except:
+                pass
+            instance.foto = foto_nueva
+
+        instance.save()
+        return instance
+
+class DonacionPerfilSerializer(ModelSerializer):
+    class Meta:
+        model = Donacion
+        depth = 2
+        fields = [
+        'id',
+        'fechaHora',
+        'registro',
+        'foto',
+        'evento',
+        'verificacion',
+        'centroDonacion',
+        'historicoEstados'
+        ]
 
 class RegistroDonacionSerializer(ModelSerializer):
     donaciones = DonacionPerfilSerializer(many=True)
