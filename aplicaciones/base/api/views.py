@@ -1,15 +1,19 @@
 from django.shortcuts import render
 
 from .serializers import (
+    CentroDonacionSerializer,
     DonanteSerializer,
+    EventoSerializer,
     GrupoSanguineoSerializer,
     NacionalidadSerializer,
     TipoDocumentoSerializer
     )
 
 from aplicaciones.base.models import (
+    CentroDonacion,
     Donante,
     GrupoSanguineo,
+    Evento,
     Nacionalidad,
     TipoDocumento
     )
@@ -24,9 +28,17 @@ from rest_framework.views import APIView
 
 from django.contrib.auth import get_user_model
 
+class CentroDonacionListAPI(ListAPIView):
+    queryset = CentroDonacion.objects.all()
+    serializer_class = CentroDonacionSerializer
+
 class DonanteListAPI(ListAPIView):
     queryset = Donante.objects.all()
     serializer_class = DonanteSerializer
+
+class EventoListAPI(ListAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
 
 class GrupoSanguineoListAPI(ListAPIView):
     permission_classes = [AllowAny]

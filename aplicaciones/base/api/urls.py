@@ -16,7 +16,9 @@ Including another URLconf
 from django.conf.urls import include, url
 
 from .views import (
+    CentroDonacionListAPI,
     DonanteListAPI,
+    EventoListAPI,
     GrupoSanguineoListAPI,
     NacionalidadListAPI,
     TipoDocumentoListAPI
@@ -28,6 +30,9 @@ urlpatterns = [
     url(r'^listado-grupos-sanguineos/$', GrupoSanguineoListAPI.as_view() , name='listado-grupos-sanguineos'),
     url(r'^listado-nacionalidades/$', NacionalidadListAPI.as_view() , name='listado-nacionalidades'),
     url(r'^listado-tipos-documentos/$', TipoDocumentoListAPI.as_view() , name='listado-tipos-documentos'),
+
+    url(r'^listado-centros-donacion/$', CentroDonacionListAPI.as_view() , name='listado-centros-donacion'),
+    url(r'^listado-eventos/$', EventoListAPI.as_view() , name='listado-eventos'),
 
     # Urls de aplicaciones
     url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
