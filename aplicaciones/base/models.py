@@ -24,6 +24,11 @@ GENEROS = {
     '2' : _(u'Mujer'),
 }
 
+DIAS_DONACION_POR_GENERO = {
+    '1': 60,
+    '2': 90,
+}
+
 def validate_fecha_hora_futuro(value):
     if value > datetime.datetime.now():
         raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
