@@ -56,11 +56,9 @@ class DonacionUpdateSerializer(ModelSerializer):
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
         foto_nueva = validated_data.get('foto', None)
 
-        if foto_nueva != None:
-            try:
+        if foto_nueva is not None:
+            if instance.foto:
                 instance.foto.delete()
-            except:
-                pass
             instance.foto = foto_nueva
 
         instance.save()
