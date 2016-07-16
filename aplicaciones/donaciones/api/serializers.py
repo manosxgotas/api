@@ -13,22 +13,7 @@ from aplicaciones.base.models import (
     HistoricoEstadoDonacion
     )
 
-class DonacionSerializer(ModelSerializer):
-    class Meta:
-        model = Donacion
-        depth = 2
-        fields = [
-        'id',
-        'fechaHora',
-        'registro',
-        'foto',
-        'evento',
-        'verificacion',
-        'centroDonacion',
-        'historicoEstados'
-        ]
-
-class DonacionAltaSerializer(ModelSerializer):
+class DonacionCreateSerializer(ModelSerializer):
     class Meta:
         model = Donacion
         fields = '__all__'
@@ -53,8 +38,49 @@ class DonacionAltaSerializer(ModelSerializer):
 
         return donacion
 
+class DonacionUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Donacion
+        fields = [
+        'fechaHora',
+        'foto',
+        'descripcion',
+        'evento',
+        'centroDonacion'
+        ]
+
+    def update(self, instance, validated_data):
+        instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
+        instance.centroDonacion = validated_data.get('centroDonacion', instance.centroDonacion)
+        instance.evento = validated_data.get('evento', instance.evento)
+        instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+        foto_nueva = validated_data.get('foto', None)
+
+        if foto_nueva is not None:
+            if instance.foto:
+                instance.foto.delete()
+            instance.foto = foto_nueva
+
+        instance.save()
+        return instance
+
+class DonacionPerfilSerializer(ModelSerializer):
+    class Meta:
+        model = Donacion
+        depth = 2
+        fields = [
+        'id',
+        'fechaHora',
+        'registro',
+        'foto',
+        'evento',
+        'verificacion',
+        'centroDonacion',
+        'historicoEstados'
+        ]
+
 class RegistroDonacionSerializer(ModelSerializer):
-    donaciones = DonacionSerializer(many=True)
+    donaciones = DonacionPerfilSerializer(many=True)
     depth = 1
     class Meta:
         model = RegistroDonacion

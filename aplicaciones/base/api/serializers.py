@@ -2,15 +2,13 @@ from rest_framework.serializers import (
     ModelSerializer,
     )
 from aplicaciones.base.models import (
+    CentroDonacion,
     Donante,
+    Evento,
     GrupoSanguineo,
     Nacionalidad,
-    TipoDocumento,
+    TipoDocumento
     )
-
-from django.contrib.auth import get_user_model
-from django.db.models import Q
-
 
 class GrupoSanguineoSerializer(ModelSerializer):
 
@@ -34,4 +32,16 @@ class DonanteSerializer(ModelSerializer):
 
     class Meta:
         model = Donante
+        fields = '__all__'
+
+class CentroDonacionSerializer(ModelSerializer):
+
+    class Meta:
+        model = CentroDonacion
+        fields = '__all__'
+
+class EventoSerializer(ModelSerializer):
+
+    class Meta:
+        model = Evento
         fields = '__all__'
