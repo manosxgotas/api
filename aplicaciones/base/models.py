@@ -2,6 +2,7 @@ import os, datetime
 
 from manosxgotas.settings.local import MEDIA_ROOT
 
+from django.utils.crypto import get_random_string
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
@@ -156,7 +157,7 @@ class Donacion(models.Model):
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
-    verificacion = models.OneToOneField('Verificacion', blank=True, null=True, verbose_name='verificación')
+    verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación')
     centroDonacion = models.ForeignKey('CentroDonacion',null=True, blank=True, verbose_name='centro de donación')
 
     def __str__(self):
@@ -190,13 +191,12 @@ class HistoricoEstadoDonacion(models.Model):
         verbose_name = 'histórico de estados de donación'
         verbose_name_plural = 'históricos de estados de donación'
 
-class Verificacion(models.Model):
+class VerificacionDonacion(models.Model):
     imagen = models.ImageField()
-    codigo = models.CharField(max_length=20, verbose_name='código')
 
     class Meta:
-        verbose_name = 'verificación'
-        verbose_name_plural = 'verificaciones'
+        verbose_name = 'verificación de donación'
+        verbose_name_plural = 'verificaciones de donación'
 
 class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
@@ -342,3 +342,20 @@ class Paciente(models.Model):
 
     def get_genero(self):
         return GENEROS.get(self.genero)
+
+def obtener_codigo_aleatorio():
+    random = get_random_string()
+    while CodigoVerificacion.objects.filter(codigo=random).exists():
+        random = get_random_string()
+    return random
+
+class CodigoVerificacion(models.Model):
+    codigo = models.CharField(max_length=12, unique=True, default=obtener_codigo_aleatorio)
+    fechaVencimiento = models.DateField(default=datetime.date.today() + datetime.timedelta(days=30), verbose_name='fecha de vencimiento')
+
+    def __str__(self):
+        return self.codigo
+
+    class Meta:
+        verbose_name = 'código de verificación'
+        verbose_name_plural = 'códigos de verificación'
