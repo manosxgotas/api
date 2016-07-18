@@ -1,7 +1,30 @@
 from django.contrib import admin
 
-from .models import *
+from ..models import (
+    CodigoVerificacion,
+    CentroDonacion,
+    Direccion,
+    Donacion,
+    Donante,
+    EstadoDonacion,
+    EstadoSolicitudDonacion,
+    Evento,
+    GrupoSanguineo,
+    GrupoSanguineoSolicitud,
+    HistoricoEstadoDonacion,
+    Localidad,
+    Nacionalidad,
+    Provincia,
+    RegistroDonacion,
+    SolicitudDonacion,
+    TipoCentroDonacion,
+    TipoDocumento,
+    TipoSolicitudDonacion,
+    )
 
+from .codigoverificacion import CodigoVerificacionAdmin
+
+admin.site.register(CodigoVerificacion, CodigoVerificacionAdmin)
 admin.site.register(CentroDonacion)
 admin.site.register(TipoCentroDonacion)
 admin.site.register(Donante)
