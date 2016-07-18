@@ -343,15 +343,22 @@ class Paciente(models.Model):
     def get_genero(self):
         return GENEROS.get(self.genero)
 
+
 def obtener_codigo_aleatorio():
     random = get_random_string()
     while CodigoVerificacion.objects.filter(codigo=random).exists():
         random = get_random_string()
     return random
 
+
+def fecha_vencimiento_defecto():
+    return datetime.date.today() + datetime.timedelta(days=30)
+
+
 class CodigoVerificacion(models.Model):
     codigo = models.CharField(max_length=12, unique=True, default=obtener_codigo_aleatorio)
-    fechaVencimiento = models.DateField(default=datetime.date.today() + datetime.timedelta(days=30), verbose_name='fecha de vencimiento')
+    fechaEmision = models.DateField(auto_now_add=True)
+    fechaVencimiento = models.DateField(default=fecha_vencimiento_defecto, verbose_name='fecha de vencimiento')
 
     def __str__(self):
         return self.codigo
