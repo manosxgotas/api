@@ -3,8 +3,8 @@
 from __future__ import unicode_literals
 
 import aplicaciones.base.models
+import datetime
 from django.db import migrations, models
-import django.utils.datetime_safe
 
 
 class Migration(migrations.Migration):
@@ -17,8 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='codigoverificacion',
             name='fechaEmision',
-            field=models.DateField(auto_now_add=True, default=django.utils.datetime_safe.datetime.now),
-            preserve_default=False,
+            field=models.DateField(default=datetime.datetime.now, verbose_name='fecha de emisión'),
         ),
         migrations.AlterField(
             model_name='codigoverificacion',

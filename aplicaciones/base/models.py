@@ -357,7 +357,7 @@ def fecha_vencimiento_defecto():
 
 class CodigoVerificacion(models.Model):
     codigo = models.CharField(max_length=12, unique=True, default=obtener_codigo_aleatorio)
-    fechaEmision = models.DateField(auto_now_add=True)
+    fechaEmision = models.DateField(default=datetime.datetime.now, verbose_name='fecha de emisión')
     fechaVencimiento = models.DateField(default=fecha_vencimiento_defecto, verbose_name='fecha de vencimiento')
 
     def __str__(self):
