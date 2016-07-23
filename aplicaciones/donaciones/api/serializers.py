@@ -46,7 +46,7 @@ class DonacionUpdateSerializer(ModelSerializer):
         'foto',
         'descripcion',
         'evento',
-        'LugarDonacion'
+        'lugarDonacion'
         ]
 
     def update(self, instance, validated_data):
