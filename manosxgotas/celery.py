@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 import os
 
+from datetime import timedelta
+
 from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
@@ -15,6 +17,13 @@ app = Celery('manosxgotas')
 # pickle the object when using Windows.
 app.config_from_object('django.conf:settings')
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
+
+app.conf.CELERYBEAT_SCHEDULE = {
+    'eliminar_codigos_vencidos': {
+        'task': 'eliminar_codigos_vencidos',
+        'schedule': timedelta(days=1)
+    },
+}
 
 
 @app.task(bind=True)
