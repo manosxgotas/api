@@ -290,7 +290,7 @@ class Evento(models.Model):
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de finalización')
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     video = models.FileField()
-    lugarDonacion = models.ForeignKey('lugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
+    lugarDonacion = models.ForeignKey('LugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
     categoria = models.ForeignKey('CategoriaEvento', verbose_name='categoría del evento')
 
     def __str__(self):
