@@ -171,7 +171,7 @@ class Donacion(models.Model):
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación')
-    lugarDonacion = models.ForeignKey('lugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
+    lugarDonacion = models.ForeignKey('LugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
 
     def __str__(self):
         return 'Donación de ' + str(self.registro.donante) + ' - ' + str(self.fechaHora)
@@ -321,7 +321,7 @@ class CategoriaEvento(models.Model):
 class CentroDonacion(models.Model):
     nombre = models.CharField(max_length=50)
     tipo = models.ForeignKey('TipoCentroDonacion')
-    lugarDonacion = models.OneToOneField('LugarDonacion', blank=True, null=True, on_delete=models.CASCADE)
+    lugarDonacion = models.OneToOneField('LugarDonacion', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nombre
