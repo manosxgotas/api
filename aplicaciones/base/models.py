@@ -171,7 +171,7 @@ class Donacion(models.Model):
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación')
-    lugarDonacion = models.ForeignKey('LugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
+    lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
 
     def __str__(self):
         return 'Donación de ' + str(self.registro.donante) + ' - ' + str(self.fechaHora)
@@ -283,14 +283,13 @@ class GrupoSanguineoSolicitud(models.Model):
         verbose_name_plural = 'grupos sanguíneos de la solicitud de donación'
 
 
-
 class Evento(models.Model):
     nombre = models.CharField(max_length=30)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de finalización')
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     video = models.FileField()
-    lugarDonacion = models.ForeignKey('LugarDonacion', blank=True, null=True, verbose_name='lugar de donación')
+    lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
     categoria = models.ForeignKey('CategoriaEvento', verbose_name='categoría del evento')
 
     def __str__(self):
