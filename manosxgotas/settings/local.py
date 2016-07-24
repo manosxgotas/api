@@ -11,19 +11,25 @@ https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
 import os
-
+import random
 import datetime
 
-import psycopg2.extensions
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-PROJECT_ROOT = os.path.abspath(
-    os.path.join(os.path.abspath(__file__),'../..'),
+BASE_DIR = os.path.dirname(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.abspath(__file__)
+            )
+        )
     )
 
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'asdf')
+PROJECT_ROOT = os.path.abspath(
+    os.path.join(os.path.abspath(__file__), '../..'),
+    )
+
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', ''.join([random.SystemRandom()
+                            .choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
+                            for i in range(50)]))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -184,3 +190,5 @@ STATICFILES_DIRS = [
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
+
+BROKER_URL = os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost//')
