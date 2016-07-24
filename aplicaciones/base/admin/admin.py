@@ -13,6 +13,7 @@ from ..models import (
     GrupoSanguineoSolicitud,
     HistoricoEstadoDonacion,
     Localidad,
+    LugarDonacion,
     Nacionalidad,
     Provincia,
     RegistroDonacion,
@@ -43,3 +44,4 @@ admin.site.register(Localidad)
 admin.site.register(Provincia)
 admin.site.register(Nacionalidad)
 admin.site.register(TipoDocumento)
+admin.site.register(LugarDonacion)

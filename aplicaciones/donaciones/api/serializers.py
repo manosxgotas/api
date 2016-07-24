@@ -46,12 +46,12 @@ class DonacionUpdateSerializer(ModelSerializer):
         'foto',
         'descripcion',
         'evento',
-        'centroDonacion'
+        'lugarDonacion'
         ]
 
     def update(self, instance, validated_data):
         instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
-        instance.centroDonacion = validated_data.get('centroDonacion', instance.centroDonacion)
+        instance.lugarDonacion = validated_data.get('lugarDonacion', instance.lugarDonacion)
         instance.evento = validated_data.get('evento', instance.evento)
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
         foto_nueva = validated_data.get('foto', None)
@@ -75,7 +75,7 @@ class DonacionPerfilSerializer(ModelSerializer):
         'foto',
         'evento',
         'verificacion',
-        'centroDonacion',
+        'lugarDonacion',
         'historicoEstados'
         ]
 
