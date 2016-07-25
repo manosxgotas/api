@@ -3,25 +3,38 @@ from rest_framework.serializers import (
     )
 
 from aplicaciones.base.models import (
-    Provincia,
-    Localidad
+    Localidad,
+    LugarDonacion,
+    Provincia
     )
+
 
 class LocalidadSerializer(ModelSerializer):
 
     class Meta:
         model = Localidad
         fields = [
-        'id',
-        'nombre',
+            'id',
+            'nombre',
         ]
+
 
 class ProvinciaSerializer(ModelSerializer):
     class Meta:
         model = Provincia
         fields = [
-        'id',
-        'nombre',
+            'id',
+            'nombre',
         ]
 
 
+class LugarDonacionSerializer(ModelSerializer):
+    class Meta:
+        model = LugarDonacion
+        depth = 3
+        fields = [
+            'id',
+            'direccion',
+            'lugarEventoDonacion',
+            'lugarCentro'
+        ]
