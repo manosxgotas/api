@@ -169,7 +169,6 @@ class Donacion(models.Model):
     foto = models.ImageField(blank=True, upload_to=establecer_destino_imagen_ubicacion)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
-    evento = models.ForeignKey('Evento', blank=True, null=True)
     verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación')
     lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
 
@@ -284,16 +283,24 @@ class GrupoSanguineoSolicitud(models.Model):
 
 
 class Evento(models.Model):
-    nombre = models.CharField(max_length=30)
+    nombre = models.CharField(max_length=100)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de finalización')
     descripcion = models.TextField(blank=True, verbose_name='descripción')
-    video = models.FileField()
-    lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
+    video = models.FileField(blank=True, null=True)
     categoria = models.ForeignKey('CategoriaEvento', verbose_name='categoría del evento')
 
     def __str__(self):
         return self.nombre
+
+
+class LugarEvento(models.Model):
+    evento = models.ForeignKey('Evento', related_name='lugarEvento')
+    lugarDonacion = models.OneToOneField('LugarDonacion', verbose_name='lugar de donación', related_name='lugarEventoDonacion')
+
+    class Meta:
+        verbose_name = 'lugar de evento'
+        verbose_name_plural = 'lugares de eventos'
 
 
 class ImagenEvento(models.Model):
@@ -320,7 +327,7 @@ class CategoriaEvento(models.Model):
 class CentroDonacion(models.Model):
     nombre = models.CharField(max_length=50)
     tipo = models.ForeignKey('TipoCentroDonacion')
-    lugarDonacion = models.OneToOneField('LugarDonacion', on_delete=models.CASCADE)
+    lugarDonacion = models.OneToOneField('LugarDonacion', related_name='lugarCentro', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.nombre

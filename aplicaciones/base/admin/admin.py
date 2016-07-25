@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from ..models import (
+    CategoriaEvento,
     CodigoVerificacion,
     CentroDonacion,
     Direccion,
@@ -14,6 +15,7 @@ from ..models import (
     HistoricoEstadoDonacion,
     Localidad,
     LugarDonacion,
+    LugarEvento,
     Nacionalidad,
     Provincia,
     RegistroDonacion,
@@ -26,6 +28,7 @@ from ..models import (
 from .codigoverificacion import CodigoVerificacionAdmin
 
 admin.site.register(CodigoVerificacion, CodigoVerificacionAdmin)
+admin.site.register(CategoriaEvento)
 admin.site.register(CentroDonacion)
 admin.site.register(TipoCentroDonacion)
 admin.site.register(Donante)
@@ -45,3 +48,4 @@ admin.site.register(Provincia)
 admin.site.register(Nacionalidad)
 admin.site.register(TipoDocumento)
 admin.site.register(LugarDonacion)
+admin.site.register(LugarEvento)
