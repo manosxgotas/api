@@ -17,7 +17,8 @@ from aplicaciones.base.models import (
     HistoricoEstadoDonacion,
     Localidad,
     LugarDonacion,
-    RegistroDonacion
+    RegistroDonacion,
+    VerificacionDonacion
     )
 
 from aplicaciones.direcciones.api.serializers import (
@@ -167,3 +168,46 @@ class RegistroDonacionSerializer(ModelSerializer):
             'privado',
             'donaciones'
         ]
+
+
+class VerificarImagenDonacionSerializer(ModelSerializer):
+    class Meta:
+        model = VerificacionDonacion
+        fields = [
+            'imagen',
+            'donacion'
+        ]
+
+    def create(self, validated_data):
+        # Obtengo los datos ingresados.
+        imagen = validated_data['imagen']
+        donacion = validated_data['donacion']
+
+        # Obtengo el último histórico de la donación y seteo
+        # su fecha fin con la fecha actual.
+        ultimo_historico_donacion = donacion.historicoEstados.last()
+        ultimo_historico_donacion.fin = datetime.datetime.now()
+        ultimo_historico_donacion.save()
+
+        # Creo nuevo histórico con estado 'Pendiente' y fecha inicio
+        # con fecha actual y lo asocio a la donación.
+        estado = EstadoDonacion.objects.get(nombre='Pendiente')
+
+        HistoricoEstadoDonacion.objects.create(
+            inicio=datetime.datetime.now(),
+            estado=estado,
+            donacion=donacion
+            )
+
+        # Creo nueva instancia de VerificacionDonacion, la asocio
+        # a la donación y guardo la imagen.
+        verificacion = VerificacionDonacion()
+        verificacion.save()
+
+        donacion.verificacion = verificacion
+        donacion.save()
+
+        verificacion.imagen = imagen
+        verificacion.save()
+
+        return verificacion
