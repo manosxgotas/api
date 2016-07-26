@@ -37,13 +37,22 @@ def validate_fecha_hora_futuro(value):
 
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
-    # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>' si es donante
+    # Almacena la imágen en: 'media/donantes/fotos/<nombre usuario>.<extension>'
+    # si es donante.
     if (isinstance(instance, Donante)):
         ruta_imagenes_ubicacion = 'donantes/fotos/'
-    # Almacena la imágen en: 'media/donaciones/<nombre usuario>/<str donacion>.<extension>' si es una donación
+    # Almacena la imágen en: 'media/donaciones/<nombre usuario>/<str donacion>.<extension>'
+    # si es una donación.
     if (isinstance(instance, Donacion)):
         owner = str(instance.registro.donante)
         ruta_imagenes_ubicacion = 'donaciones/' + owner + '/'
+    # Almacena la imágen en:
+    # 'media/donaciones/<nombre usuario>/verificaciones/<str donacion>/<str verificacion>.<extension>'
+    # si es una verificación.
+    if (isinstance(instance, VerificacionDonacion)):
+        owner = str(instance.donacion.registro.donante)
+        donacion = str(instance.donacion)
+        ruta_imagenes_ubicacion = 'donaciones/' + owner + '/verificaciones/' + donacion + '/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -169,7 +178,7 @@ class Donacion(models.Model):
     foto = models.ImageField(blank=True, upload_to=establecer_destino_imagen_ubicacion)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
-    verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación')
+    verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación', related_name='donacion')
     lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
 
     def __str__(self):
@@ -207,11 +216,14 @@ class HistoricoEstadoDonacion(models.Model):
 
 
 class VerificacionDonacion(models.Model):
-    imagen = models.ImageField()
+    imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
 
     class Meta:
         verbose_name = 'verificación de donación'
         verbose_name_plural = 'verificaciones de donación'
+
+    def __str__(self):
+        return 'Verificación de ' + str(self.donacion)
 
 
 class SolicitudDonacion(models.Model):
