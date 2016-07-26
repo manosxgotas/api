@@ -23,6 +23,7 @@ from ..models import (
     TipoCentroDonacion,
     TipoDocumento,
     TipoSolicitudDonacion,
+    VerificacionDonacion
     )
 
 from .codigoverificacion import CodigoVerificacionAdmin
@@ -49,3 +50,4 @@ admin.site.register(Nacionalidad)
 admin.site.register(TipoDocumento)
 admin.site.register(LugarDonacion)
 admin.site.register(LugarEvento)
+admin.site.register(VerificacionDonacion)
