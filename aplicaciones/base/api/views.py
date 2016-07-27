@@ -18,7 +18,7 @@ from aplicaciones.base.models import (
     TipoDocumento
     )
 
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, RetrieveAPIView
 
 from rest_framework.permissions import AllowAny
 
@@ -39,6 +39,11 @@ class DonanteListAPI(ListAPIView):
 class EventoListAPI(ListAPIView):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
+
+class EventoInfoAPI(RetrieveAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+    lookup_field = 'id'
 
 class GrupoSanguineoListAPI(ListAPIView):
     permission_classes = [AllowAny]
