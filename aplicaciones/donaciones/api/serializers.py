@@ -26,7 +26,47 @@ from aplicaciones.direcciones.api.serializers import (
     )
 
 
-class DonacionCreateSerializer(ModelSerializer):
+def obtener_lugar_donacion(datos_ingresados):
+
+    '''
+    Método para determinar el LugarDonacion a asociar con la Donacion según la
+    opción ingresada por el donante al momento de crear o actualizar la donación.
+    '''
+
+    centro = datos_ingresados.get('centroDonacion', None)
+    evento = datos_ingresados.get('evento', None)
+    direccion = datos_ingresados.get('direccion', None)
+
+    lugar_donacion = None
+    # Donación realizada en un centro de donación.
+    if centro is not None:
+        centro = CentroDonacion.objects.get(id=centro)
+        lugar_donacion = centro.lugarDonacion
+    # Donación realizada en un evento.
+    elif evento is not None:
+        eventoDonacion = Evento.objects.get(id=evento)
+        lugar_donacion = eventoDonacion.lugarEvento.last().lugarDonacion
+    # Donación realizada en una dirección en particular.
+    elif direccion is not None:
+        localidad = Localidad.objects.get(id=int(direccion['localidad']))
+
+        nuevaDireccion = Direccion.objects.create(
+            localidad=localidad,
+            calle=direccion['calle'],
+            numero=direccion['numero']
+            )
+
+        lugar_donacion = LugarDonacion.objects.create(
+            direccion=nuevaDireccion
+            )
+    # Si no ingresó ninguna opción de lugar.
+    else:
+        raise ValidationError('Debes ingresar un lugar donde realizaste tu donación.')
+
+    return lugar_donacion
+
+
+class DonacionCreateUpdateDestroySerializer(ModelSerializer):
     centroDonacion = CharField(write_only=True, required=False)
     evento = CharField(write_only=True, required=False)
     direccion = JSONField(binary=True, write_only=True, required=False)
@@ -55,36 +95,8 @@ class DonacionCreateSerializer(ModelSerializer):
         foto = validated_data.get('foto', None)
         registro = validated_data.get('registro')
         descripcion = validated_data.get('descripcion', '')
-        lugarDonacion = None
 
-        centroDonacion = validated_data.get('centroDonacion', None)
-        evento = validated_data.get('evento', None)
-        direccion = validated_data.get('direccion', None)
-
-        # Donación realizada en un centro de donación.
-        if centroDonacion is not None:
-            centro = CentroDonacion.objects.get(id=centroDonacion)
-            lugarDonacion = centro.lugarDonacion
-        # Donación realizada en un evento.
-        elif evento is not None:
-            eventoDonacion = Evento.objects.get(id=evento)
-            lugarDonacion = eventoDonacion.lugarEvento.last().lugarDonacion
-        # Donación realizada en una dirección en particular.
-        elif direccion is not None:
-            localidad = Localidad.objects.get(id=int(direccion['localidad']))
-
-            nuevaDireccion = Direccion.objects.create(
-                localidad=localidad,
-                calle=direccion['calle'],
-                numero=direccion['numero']
-                )
-
-            lugarDonacion = LugarDonacion.objects.create(
-                direccion=nuevaDireccion
-                )
-        # Si no ingresó ninguna opción de lugar.
-        else:
-            raise ValidationError('Debes ingresar un lugar donde realizaste tu donación.')
+        lugar_donacion = obtener_lugar_donacion(validated_data)
 
         # Creo objeto donación
         donacion = Donacion.objects.create(
@@ -92,7 +104,7 @@ class DonacionCreateSerializer(ModelSerializer):
             foto=foto,
             registro=registro,
             descripcion=descripcion,
-            lugarDonacion=lugarDonacion
+            lugarDonacion=lugar_donacion
             )
 
         # Seteo estado 'Sin verificar' a la donación.
@@ -108,33 +120,21 @@ class DonacionCreateSerializer(ModelSerializer):
 
         return donacion
 
-
-class DonacionUpdateSerializer(ModelSerializer):
-    class Meta:
-        model = Donacion
-        fields = [
-            'fechaHora',
-            'foto',
-            'descripcion',
-            'lugarDonacion'
-        ]
-
-    def validate_fechaHora(self, value):
-        if value > datetime.datetime.now():
-            raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
-        return value
-
     def update(self, instance, validated_data):
         instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
-        instance.lugarDonacion = validated_data.get('lugarDonacion', instance.lugarDonacion)
-        instance.evento = validated_data.get('evento', instance.evento)
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+
         foto_nueva = validated_data.get('foto', None)
 
+        # Si existe nueva foto la seteo a la instancia.
         if foto_nueva is not None:
             if instance.foto:
                 instance.foto.delete()
             instance.foto = foto_nueva
+
+        nuevo_lugar_donacion = obtener_lugar_donacion(validated_data)
+
+        instance.lugarDonacion = nuevo_lugar_donacion
 
         instance.save()
         return instance
@@ -154,6 +154,7 @@ class DonacionPerfilSerializer(ModelSerializer):
             'verificacion',
             'lugarDonacion',
             'historicoEstados',
+            'descripcion'
         ]
 
 
