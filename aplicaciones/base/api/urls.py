@@ -19,6 +19,7 @@ from .views import (
     CentroDonacionListAPI,
     DonanteListAPI,
     EventoListAPI,
+    EventoInfoAPI,
     GrupoSanguineoListAPI,
     NacionalidadListAPI,
     TipoDocumentoListAPI
@@ -33,6 +34,7 @@ urlpatterns = [
 
     url(r'^listado-centros-donacion/$', CentroDonacionListAPI.as_view() , name='listado-centros-donacion'),
     url(r'^listado-eventos/$', EventoListAPI.as_view() , name='listado-eventos'),
+    url(r'^ver-evento/(?P<id>\w+)$', EventoInfoAPI.as_view() , name='ver-evento'),
 
     # Urls de aplicaciones
     url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
