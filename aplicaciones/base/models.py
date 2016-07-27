@@ -222,9 +222,6 @@ class VerificacionDonacion(models.Model):
         verbose_name = 'verificación de donación'
         verbose_name_plural = 'verificaciones de donación'
 
-    def __str__(self):
-        return 'Verificación de ' + str(self.donacion)
-
 
 class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
