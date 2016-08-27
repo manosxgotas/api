@@ -1,0 +1,14 @@
+Bienvenido {{ usuario.get_full_name }}
+
+¡Gracias por registrarte en Manos por gotas!
+
+Para completar el proceso de registro y acceder al sistema utiliza el siguiente link para activar tu cuenta:
+
+{{ confirm_url }}
+
+Si el link de activación no funciona, introduce la siguiente clave en la plataforma:
+
+{{ clave }}
+
+Atentamente,
+Equipo de Manos por gotas.
