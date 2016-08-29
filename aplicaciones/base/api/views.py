@@ -35,15 +35,15 @@ class CentroDonacionListAPI(ListAPIView):
 class DonanteListAPI(ListAPIView):
     queryset = Donante.objects.all()
     serializer_class = DonanteSerializer
-
-class EventoListAPI(ListAPIView):
-    queryset = Evento.objects.all()
-    serializer_class = EventoSerializer
-
+    
 class EventoInfoAPI(RetrieveAPIView):
     queryset = Evento.objects.all()
     serializer_class = EventoSerializer
     lookup_field = 'id'
+
+class EventoListAPI(ListAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
 
 class GrupoSanguineoListAPI(ListAPIView):
     permission_classes = [AllowAny]

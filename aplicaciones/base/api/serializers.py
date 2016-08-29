@@ -7,6 +7,8 @@ from aplicaciones.base.models import (
     Evento,
     GrupoSanguineo,
     Nacionalidad,
+    ImagenEvento,
+    LugarEvento,
     TipoDocumento
     )
 
@@ -40,8 +42,19 @@ class CentroDonacionSerializer(ModelSerializer):
         model = CentroDonacion
         fields = '__all__'
 
-class EventoSerializer(ModelSerializer):
+class LugarEventoSerializer(ModelSerializer):
+    class Meta:
+        model = LugarEvento 
+        fields = '__all__'
 
+class ImagenEventoSerializer(ModelSerializer):
+    class Meta:
+        model = ImagenEvento
+        fields = '__all__'
+
+class EventoSerializer(ModelSerializer):
+    imagenEvento = ImagenEventoSerializer(many=True)
+    lugarEvento = LugarEventoSerializer(many=True)
     class Meta:
         model = Evento
         fields = '__all__'

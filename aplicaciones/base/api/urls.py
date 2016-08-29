@@ -33,8 +33,9 @@ urlpatterns = [
     url(r'^listado-tipos-documentos/$', TipoDocumentoListAPI.as_view() , name='listado-tipos-documentos'),
 
     url(r'^listado-centros-donacion/$', CentroDonacionListAPI.as_view() , name='listado-centros-donacion'),
-    url(r'^listado-eventos/$', EventoListAPI.as_view() , name='listado-eventos'),
     url(r'^ver-evento/(?P<id>\w+)$', EventoInfoAPI.as_view() , name='ver-evento'),
+    url(r'^listado-eventos/$', EventoListAPI.as_view() , name='listado-eventos'),
+    
 
     # Urls de aplicaciones
     url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
