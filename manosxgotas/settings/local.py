@@ -19,17 +19,23 @@ BASE_DIR = os.path.dirname(
     os.path.dirname(
         os.path.dirname(
             os.path.abspath(__file__)
-            )
         )
     )
+)
 
 PROJECT_ROOT = os.path.abspath(
     os.path.join(os.path.abspath(__file__), '../..'),
-    )
+)
 
+# Clave secreta del proyecto.
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', ''.join([random.SystemRandom()
                             .choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
                             for i in range(50)]))
+
+# Clave de seguridad 'SALT' de itsdangerous.
+SECURITY_PASSWORD_SALT = os.environ.get('DJANGO_SECURITY_PASSWORD_SALT', ''.join([random.SystemRandom()
+                                        .choice('abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)')
+                                        for i in range(50)]))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
@@ -64,19 +70,19 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        ),
+    ),
 
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
-        ),
+    ),
 
     'DATE_INPUT_FORMATS': [
         '%d/%m/%Y'
-        ],
+    ],
 
     'DATETIME_INPUT_FORMATS': [
         '%d/%m/%Y %H:%M'
-        ],
+    ],
 
     'COERCE_DECIMAL_TO_STRING': False
 }
@@ -98,7 +104,7 @@ ROOT_URLCONF = 'manosxgotas.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [PROJECT_ROOT + 'aplicaciones/base/templates/'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -118,13 +124,13 @@ WSGI_APPLICATION = 'manosxgotas.wsgi.application'
 
 DATABASES = {
     'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ.get('DB_NAME', 'postgresdb'),
-            'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', '1234'),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
-            'PORT': os.environ.get('DB_PORT', '5432'),
-        }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ.get('DB_NAME', 'postgresdb'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '1234'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
 }
 
 # Password validation
@@ -178,9 +184,19 @@ STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
-    ]
+]
 
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 MEDIA_URL = '/media/'
 
 BROKER_URL = os.environ.get('BROKER_URL', 'amqp://guest:guest@localhost//')
+
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:8100/#/')
+
+# Configuración email
+EMAIL_PORT = 587
+EMAIL_BACKEND = 'django_mailgun.MailgunBackend'
+MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
+MAILGUN_SERVER_NAME = os.environ.get('MAILGUN_SERVER_NAME')
+DEFAULT_FROM_EMAIL = 'staff@manosxgotas.org'
+EMAIL_USE_TLS = True
