@@ -1,14 +1,22 @@
 import os, datetime
 
 from manosxgotas.settings.local import MEDIA_ROOT
-
+from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import (
+    User,
+    AbstractBaseUser,
+    UserManager
+    )
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator,
+    RegexValidator
+    )
 
 DIAS_SEMANA = {
     '1': _(u'Lunes'),
@@ -56,6 +64,17 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
+
+
+def obtener_codigo_aleatorio():
+    random = get_random_string()
+    while CodigoVerificacion.objects.filter(codigo=random).exists():
+        random = get_random_string()
+    return random
+
+
+def fecha_vencimiento_defecto():
+    return datetime.date.today() + datetime.timedelta(days=30)
 
 
 class GenerosField(models.CharField):
@@ -386,17 +405,6 @@ class Paciente(models.Model):
 
     def get_genero(self):
         return GENEROS.get(self.genero)
-
-
-def obtener_codigo_aleatorio():
-    random = get_random_string()
-    while CodigoVerificacion.objects.filter(codigo=random).exists():
-        random = get_random_string()
-    return random
-
-
-def fecha_vencimiento_defecto():
-    return datetime.date.today() + datetime.timedelta(days=30)
 
 
 class CodigoVerificacion(models.Model):
