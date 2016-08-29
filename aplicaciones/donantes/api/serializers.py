@@ -1,6 +1,5 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    ValidationError,
     IntegerField
     )
 from aplicaciones.base.models import (
@@ -15,115 +14,129 @@ from aplicaciones.donaciones.api.serializers import (
     )
 
 from django.contrib.auth import get_user_model
-from django.db.models import Q
 
 User = get_user_model()
 
+
 class UsuarioPerfilSerializer(ModelSerializer):
-     class Meta:
+    class Meta:
         model = User
         fields = [
-        'username',
-        'email',
-        'first_name',
-        'last_name',
+            'id',
+            'username',
+            'email',
+            'first_name',
+            'last_name',
         ]
 
+
 class LocalidadPerfilSerializer(ModelSerializer):
-     class Meta:
+    class Meta:
         model = Localidad
         fields = '__all__'
 
+
 class DireccionPerfilSerializer(ModelSerializer):
     localidad = LocalidadPerfilSerializer()
+
     class Meta:
         model = Direccion
         fields = [
-        'calle',
-        'numero',
-        'piso',
-        'numeroDepartamento',
-        'localidad'
+            'calle',
+            'numero',
+            'piso',
+            'numeroDepartamento',
+            'localidad'
         ]
+
 
 class GrupoSanguineoPerfilSerializer(ModelSerializer):
     class Meta:
         model = GrupoSanguineo
         fields = [
-        'id',
-        'nombre'
+            'id',
+            'nombre'
         ]
+
 
 class DonantePerfilSerializer(ModelSerializer):
     usuario = UsuarioPerfilSerializer()
     direccion = DireccionPerfilSerializer()
     grupoSanguineo = GrupoSanguineoPerfilSerializer()
     registro = RegistroDonacionSerializer()
+
     class Meta:
         model = Donante
         fields = [
-        'usuario',
-        'numeroDocumento',
-        'tipoDocumento',
-        'foto',
-        'nacimiento',
-        'telefono',
-        'peso',
-        'altura',
-        'genero',
-        'grupoSanguineo',
-        'direccion',
-        'nacionalidad',
-        'registro'
+            'usuario',
+            'numeroDocumento',
+            'tipoDocumento',
+            'foto',
+            'nacimiento',
+            'telefono',
+            'peso',
+            'altura',
+            'genero',
+            'grupoSanguineo',
+            'direccion',
+            'nacionalidad',
+            'registro'
         ]
+
 
 class UsuarioUpdateSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = [
-        'first_name',
-        'last_name',
+            'first_name',
+            'last_name',
         ]
 
+
 class LocalidadUpdateSerializer(ModelSerializer):
-     id = IntegerField()
-     class Meta:
+    id = IntegerField()
+
+    class Meta:
         model = Localidad
         fields = [
-        'id',
-        'nombre',
-        'provincia'
+            'id',
+            'nombre',
+            'provincia'
         ]
+
 
 class DireccionUpdateSerializer(ModelSerializer):
     localidad = LocalidadUpdateSerializer()
+
     class Meta:
         model = Direccion
         fields = [
-        'calle',
-        'numero',
-        'piso',
-        'numeroDepartamento',
-        'localidad',
+            'calle',
+            'numero',
+            'piso',
+            'numeroDepartamento',
+            'localidad',
         ]
+
 
 class DonanteUpdateSerializer(ModelSerializer):
     usuario = UsuarioUpdateSerializer()
     direccion = DireccionUpdateSerializer()
+
     class Meta:
         model = Donante
         fields = [
-        'usuario',
-        'numeroDocumento',
-        'tipoDocumento',
-        'nacimiento',
-        'telefono',
-        'peso',
-        'altura',
-        'genero',
-        'grupoSanguineo',
-        'direccion',
-        'nacionalidad'
+            'usuario',
+            'numeroDocumento',
+            'tipoDocumento',
+            'nacimiento',
+            'telefono',
+            'peso',
+            'altura',
+            'genero',
+            'grupoSanguineo',
+            'direccion',
+            'nacionalidad'
         ]
 
     def update(self, instance, validated_data):
@@ -169,6 +182,7 @@ class DonanteUpdateSerializer(ModelSerializer):
 
         return instance
 
+
 class DonanteAvatarSerializer(ModelSerializer):
     class Meta:
         model = Donante
@@ -180,4 +194,3 @@ class DonanteAvatarSerializer(ModelSerializer):
         instance.save()
 
         return instance
-
