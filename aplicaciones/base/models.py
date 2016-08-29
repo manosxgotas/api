@@ -5,7 +5,9 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.db import models
 from django.contrib.auth.models import (
-    User
+    User,
+    AbstractBaseUser,
+    UserManager
     )
 from django.utils.translation import ugettext as _
 from django.template.defaultfilters import slugify
@@ -63,23 +65,17 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
 
-def obtener_codigo_aleatorio(instance):
+
+def obtener_codigo_aleatorio():
     random = get_random_string()
-    if (isinstance(instance, CodigoVerificacion)):
-        while CodigoVerificacion.objects.filter(codigo=random).exists():
-            random = get_random_string()
-    elif (isinstance(instance, Donante)):
-        while Donante.objects.filter(codigoActivacion=random).exists():
-            random = get_random_string()
+    while CodigoVerificacion.objects.filter(codigo=random).exists():
+        random = get_random_string()
     return random
 
 
-def fecha_vencimiento_defecto(instance):
-    if (isinstance(instance, CodigoVerificacion)):
-        vencimiento = datetime.date.today() + datetime.timedelta(days=30)
-    elif (isinstance(instance, Donante)):
-        vencimiento = datetime.date.today() + datetime.timedelta(hours=5)
-    return vencimiento
+def fecha_vencimiento_defecto():
+    return datetime.date.today() + datetime.timedelta(days=30)
+
 
 class GenerosField(models.CharField):
     def __init__(self, *args, **kwargs):
@@ -97,8 +93,6 @@ class DiasSemanaField(models.CharField):
 
 class Donante(models.Model):
     usuario = models.ForeignKey(User)
-    claveActivacion = models.CharField(max_length=20, unique=True, default=obtener_codigo_aleatorio)
-    vencimientoClaveActivacion = models.DateTimeField(default=fecha_vencimiento_defecto)
     numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento')
     tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento')
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
