@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'sslserver',
+    'geoposition',
 ]
 
 REST_FRAMEWORK = {
@@ -200,3 +201,15 @@ MAILGUN_ACCESS_KEY = os.environ.get('MAILGUN_ACCESS_KEY')
 MAILGUN_SERVER_NAME = os.environ.get('MAILGUN_SERVER_NAME')
 DEFAULT_FROM_EMAIL = 'staff@manosxgotas.org'
 EMAIL_USE_TLS = True
+
+# Google maps
+GEOPOSITION_GOOGLE_MAPS_API_KEY = os.environ.get('GEOPOSITION_GOOGLE_MAPS_API_KEY')
+GEOPOSITION_MAP_OPTIONS = {
+    'center': {'lat': -32.8897586, 'lng': -68.8445271},
+    'minZoom': 5,
+    'maxZoom': 16,
+    'zoom': 13
+}
+GEOPOSITION_MARKER_OPTIONS = {
+    'position': {'lat': -32.8897586, 'lng': -68.8445271},
+}
