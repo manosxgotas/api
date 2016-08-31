@@ -71,9 +71,15 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
         owner = str(instance.donacion.registro.donante)
         donacion = str(instance.donacion)
         ruta_imagenes_ubicacion = 'donaciones/' + owner + '/verificaciones/' + donacion + '/'
+    # Almacena la imágen en: 'media/solicitudes/<nombre usuario>/<titulo solicitud>'
+    # si es un evento.
     if (isinstance(instance, ImagenSolicitudDonacion)):
         owner = str(instance.solicitud.usuario.donante)
-        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + instance.titulo
+        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + instance.titulo + '/'
+    # Almacena la imágen en: 'media/eventos/<nombre evento>/'
+    # si es un evento.
+    if (isinstance(instance, ImagenEvento)):
+        ruta_imagenes_ubicacion = 'eventos/' + instance.evento.nombre + '/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -366,8 +372,9 @@ class LugarEvento(models.Model):
 
 
 class ImagenEvento(models.Model):
-    imagen = models.ImageField()
-    evento = models.ForeignKey('Evento')
+    imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
+    portada = models.BooleanField(default=False)
+    evento = models.ForeignKey('Evento', related_name='imagenesEvento')
 
     class Meta:
         verbose_name = 'imagen del evento'
