@@ -240,7 +240,7 @@ class Donacion(models.Model):
     lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
 
     def __str__(self):
-        return 'Donación de ' + str(self.registro.donante) + ' - ' + str(self.fechaHora)
+        return 'Donación de ' + str(self.registro.donante)
 
     class Meta:
         verbose_name = 'donación'

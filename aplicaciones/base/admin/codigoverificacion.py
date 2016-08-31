@@ -63,3 +63,5 @@ class CodigoVerificacionAdmin(admin.ModelAdmin):
                                                  self.get_prepopulated_fields(request))
 
         return render(request, 'admin/base/codigoverificacion/generar.html', context)
+
+admin.site.register(CodigoVerificacion, CodigoVerificacionAdmin)
