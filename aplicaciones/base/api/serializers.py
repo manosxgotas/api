@@ -7,8 +7,11 @@ from aplicaciones.base.models import (
     Evento,
     GrupoSanguineo,
     Nacionalidad,
+    ImagenEvento,
+    LugarEvento,
     TipoDocumento
     )
+
 
 class GrupoSanguineoSerializer(ModelSerializer):
 
@@ -16,11 +19,13 @@ class GrupoSanguineoSerializer(ModelSerializer):
         model = GrupoSanguineo
         fields = '__all__'
 
+
 class NacionalidadSerializer(ModelSerializer):
 
     class Meta:
         model = Nacionalidad
         fields = '__all__'
+
 
 class TipoDocumentoSerializer(ModelSerializer):
 
@@ -28,11 +33,13 @@ class TipoDocumentoSerializer(ModelSerializer):
         model = TipoDocumento
         fields = '__all__'
 
+
 class DonanteSerializer(ModelSerializer):
 
     class Meta:
         model = Donante
         fields = '__all__'
+
 
 class CentroDonacionSerializer(ModelSerializer):
 
@@ -40,8 +47,32 @@ class CentroDonacionSerializer(ModelSerializer):
         model = CentroDonacion
         fields = '__all__'
 
+
+class LugarEventoSerializer(ModelSerializer):
+    class Meta:
+        model = LugarEvento
+        fields = '__all__'
+
+
+class ImagenEventoSerializer(ModelSerializer):
+    class Meta:
+        model = ImagenEvento
+        fields = '__all__'
+
+
 class EventoSerializer(ModelSerializer):
+    imagenesEvento = ImagenEventoSerializer(many=True)
+    lugarEvento = LugarEventoSerializer(many=True)
 
     class Meta:
         model = Evento
-        fields = '__all__'
+        fields = [
+            'id',
+            'nombre',
+            'fechaHoraInicio',
+            'fechaHoraFin',
+            'categoria',
+            'descripcion',
+            'imagenesEvento',
+            'lugarEvento'
+        ]
