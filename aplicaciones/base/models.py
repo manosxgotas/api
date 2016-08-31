@@ -17,6 +17,7 @@ from django.core.validators import (
     MaxValueValidator,
     RegexValidator
     )
+from geoposition.fields import GeopositionField
 
 DIAS_SEMANA = {
     '1': _(u'Lunes'),
@@ -36,6 +37,15 @@ GENEROS = {
 DIAS_DONACION_POR_GENERO = {
     '1': 60,
     '2': 90,
+}
+
+SENTIMIENTOS = {
+    '1': _(u'Muy mal'),
+    '2': _(u'Mal'),
+    '3': _(u'Descompuesto'),
+    '4': _(u'Bien'),
+    '5': _(u'Muy bien'),
+    '6': _(u'Excelente'),
 }
 
 
@@ -61,6 +71,9 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
         owner = str(instance.donacion.registro.donante)
         donacion = str(instance.donacion)
         ruta_imagenes_ubicacion = 'donaciones/' + owner + '/verificaciones/' + donacion + '/'
+    if (isinstance(instance, ImagenSolicitudDonacion)):
+        owner = str(instance.solicitud.usuario.donante)
+        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + instance.titulo
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -91,18 +104,36 @@ class DiasSemanaField(models.CharField):
         super(DiasSemanaField, self).__init__(*args, **kwargs)
 
 
+class SentimientosField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        kwargs['choices'] = tuple(sorted(SENTIMIENTOS.items()))
+        kwargs['max_length'] = 1
+        super(SentimientosField, self).__init__(*args, **kwargs)
+
+
 class Donante(models.Model):
-    usuario = models.ForeignKey(User)
-    numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento')
-    tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento')
+    usuario = models.OneToOneField(User)
+    numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento', blank=True, null=True)
+    tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento', null=True, blank=True)
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
-    telefono = models.CharField(max_length=20, verbose_name='teléfono')
+    telefono = models.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[\d()*-]+$',
+                message='El formato de número de teléfono es incorrecto.'
+            )
+        ],
+        max_length=30,
+        verbose_name='teléfono',
+        blank=True,
+        null=True
+    )
     nacimiento = models.DateField(verbose_name='fecha de nacimiento')
     peso = models.DecimalField(max_digits=4, decimal_places=1)
     altura = models.PositiveIntegerField(validators=[MinValueValidator(100), MaxValueValidator(350)])
     genero = GenerosField(verbose_name='género')
-    grupoSanguineo = models.ForeignKey('GrupoSanguineo', null=True, verbose_name='grupo sanguíneo')
-    direccion = models.ForeignKey('Direccion', verbose_name='dirección')
+    grupoSanguineo = models.ForeignKey('GrupoSanguineo', blank=True, null=True, verbose_name='grupo sanguíneo')
+    direccion = models.ForeignKey('Direccion', verbose_name='dirección', null=True, blank=True)
     nacionalidad = models.ForeignKey('Nacionalidad')
 
     def get_genero(self):
@@ -136,10 +167,11 @@ class TipoDocumento(models.Model):
 
 class Direccion(models.Model):
     calle = models.CharField(max_length=50)
-    numero = models.PositiveSmallIntegerField(verbose_name='número')
-    piso = models.SmallIntegerField(blank=True, null=True)
-    numeroDepartamento = models.PositiveSmallIntegerField(blank=True, null=True, verbose_name='número de departamento')
+    numero = models.PositiveIntegerField(verbose_name='número')
+    piso = models.IntegerField(blank=True, null=True)
+    numeroDepartamento = models.PositiveIntegerField(blank=True, null=True, verbose_name='número de departamento')
     localidad = models.ForeignKey('Localidad')
+    posicion = GeopositionField(blank=True, null=True, verbose_name='posición')
 
     def __str__(self):
         return self.calle + '-' + str(self.numero)
@@ -195,6 +227,7 @@ class RegistroDonacion(models.Model):
 class Donacion(models.Model):
     fechaHora = models.DateTimeField(verbose_name='fecha y hora', validators=[validate_fecha_hora_futuro])
     foto = models.ImageField(blank=True, upload_to=establecer_destino_imagen_ubicacion)
+    estado = SentimientosField(blank=True, null=True)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
     verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación', related_name='donacion')
@@ -246,13 +279,14 @@ class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
     fechaPublicacion = models.DateField(verbose_name='fecha de publicación')
     donantesNecesarios = models.SmallIntegerField(verbose_name='cantidad de donantes necesarios')
-    video = models.FileField()
+    video = models.FileField(blank=True, null=True)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de fin')
     estado = models.ForeignKey('EstadoSolicitudDonacion', verbose_name='estado de solicitud de donación')
     tipo = models.ForeignKey('TipoSolicitudDonacion', verbose_name='tipo de solicitud de donación')
-    centroDonacion = models.ForeignKey('CentroDonacion', null=True, verbose_name='centro de donación')
+    centroDonacion = models.ForeignKey('CentroDonacion', null=True, blank=True, verbose_name='centro de donación')
     paciente = models.ForeignKey('Paciente')
+    donante = models.ForeignKey('Donante')
 
     def __str__(self):
         return self.fechaPublicacion + '-' + self.titulo
@@ -287,8 +321,8 @@ class TipoSolicitudDonacion(models.Model):
 
 
 class ImagenSolicitudDonacion(models.Model):
-    imagen = models.ImageField()
-    solicitud = models.ForeignKey('SolicitudDonacion')
+    imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
+    solicitud = models.ForeignKey('SolicitudDonacion', related_name='imagenesSolicitud')
 
     def __str__(self):
         return self.id
@@ -379,6 +413,7 @@ class TipoCentroDonacion(models.Model):
 
 
 class HorarioCentroDonacion(models.Model):
+    centro = models.ForeignKey('CentroDonacion', related_name='horarios')
     dia = DiasSemanaField()
     horaApertura = models.TimeField(verbose_name='hora de apertura')
     horaCierre = models.TimeField(verbose_name='hora de cierre')
@@ -396,7 +431,18 @@ class Paciente(models.Model):
     apellido = models.CharField(max_length=50)
     email = models.EmailField()
     nacimiento = models.DateField(verbose_name='fecha de nacimiento')
-    telefono = models.CharField(max_length=20, verbose_name='teléfono')
+    telefono = models.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[\d()*-]+$',
+                message='El formato de número de teléfono es incorrecto.'
+            )
+        ],
+        max_length=30,
+        verbose_name='teléfono',
+        blank=True,
+        null=True
+    )
     genero = GenerosField()
     direccion = models.ForeignKey('Direccion', verbose_name='dirección')
 

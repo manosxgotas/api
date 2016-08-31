@@ -66,15 +66,15 @@ class DonanteRegistroSerializer(ModelSerializer):
     def create(self, validated_data):
 
         # Obtención de datos del donante
-        numeroDocumento = validated_data['numeroDocumento']
-        tipoDocumento = validated_data['tipoDocumento']
+        numeroDocumento = validated_data.get('numeroDocumento', None)
+        tipoDocumento = validated_data.get('tipoDocumento', None)
         nacimiento = validated_data['nacimiento']
-        telefono = validated_data['telefono']
+        telefono = validated_data.get('telefono', None)
         peso = validated_data['peso']
         altura = validated_data['altura']
         genero = validated_data['genero']
         grupoSanguineo = validated_data.get('grupoSanguineo', None)
-        nacionalidad = validated_data['nacionalidad']
+        nacionalidad = validated_data.get('nacionalidad', None)
 
         # Obtención de datos del usuario
         usuario_data = validated_data.pop('usuario')
@@ -85,13 +85,8 @@ class DonanteRegistroSerializer(ModelSerializer):
         usuario.set_password(usuario_data['password'])
         usuario.save()
 
-        # Obtención de los datos de la dirección
-        direccion_data = validated_data.pop('direccion')
-        direccion = Direccion(**direccion_data)
-        direccion.save()
-
         # Creación de la instancia de Donante
-        donante_obj = Donante.objects.create(
+        donante_obj = Donante(
             usuario=usuario,
             numeroDocumento=numeroDocumento,
             tipoDocumento=tipoDocumento,
@@ -101,9 +96,18 @@ class DonanteRegistroSerializer(ModelSerializer):
             altura=altura,
             genero=genero,
             grupoSanguineo=grupoSanguineo,
-            direccion=direccion,
             nacionalidad=nacionalidad
         )
+
+        # Obtención de los datos de la dirección
+        direccion_data = validated_data.pop('direccion', None)
+        if direccion_data is not None:
+            direccion = Direccion(**direccion_data)
+            direccion.save()
+
+            donante_obj.direccion = direccion
+
+        donante_obj.save()
 
         # Creación de instancia de Registro de donación asociada con la instancia de Donante
         RegistroDonacion.objects.create(donante=donante_obj)

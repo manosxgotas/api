@@ -95,6 +95,7 @@ class DonacionCreateUpdateDestroySerializer(ModelSerializer):
         foto = validated_data.get('foto', None)
         registro = validated_data.get('registro')
         descripcion = validated_data.get('descripcion', '')
+        estado = validated_data.get('estado', None)
 
         lugar_donacion = obtener_lugar_donacion(validated_data)
 
@@ -104,7 +105,8 @@ class DonacionCreateUpdateDestroySerializer(ModelSerializer):
             foto=foto,
             registro=registro,
             descripcion=descripcion,
-            lugarDonacion=lugar_donacion
+            lugarDonacion=lugar_donacion,
+            estado=estado
             )
 
         # Seteo estado 'Sin verificar' a la donación.
@@ -123,6 +125,7 @@ class DonacionCreateUpdateDestroySerializer(ModelSerializer):
     def update(self, instance, validated_data):
         instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
         instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+        instance.estado = validated_data.get('estado', instance.estado)
 
         foto_nueva = validated_data.get('foto', None)
 
