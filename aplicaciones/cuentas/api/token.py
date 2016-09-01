@@ -50,7 +50,7 @@ def enviar_mail_activacion(usuario):
     token_clave = generar_token_confirmacion(usuario.id)
 
     # Creación de URL de confirmación
-    confirm_url = FRONTEND_URL + 'activar-cuenta-link/' + token_link
+    confirm_url = FRONTEND_URL + 'activar-cuenta/' + token_link
 
     # Obtención de templates html y txt de emails.
     htmly = loader.get_template('emails/html/confirmar_cuenta.html')
