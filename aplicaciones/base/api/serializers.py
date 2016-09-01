@@ -56,10 +56,11 @@ class CentroDonacionSerializer(ModelSerializer):
             'id',
             'nombre',
             'tipo',
+            'telefono',
             'lugarDonacion',
             'horarios'
         ]
-        depth = 2
+        depth = 4
 
 
 class LugarEventoSerializer(ModelSerializer):
