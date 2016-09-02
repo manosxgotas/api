@@ -1,4 +1,3 @@
-import datetime
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import (
@@ -10,7 +9,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.status import (
     HTTP_200_OK,
-    HTTP_400_BAD_REQUEST
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND
     )
 from aplicaciones.base.models import (
     Donante,
@@ -19,13 +19,19 @@ from .serializers import (
     DonanteRegistroSerializer,
     )
 
-from .token import confirmar_token
+from .token import (
+    confirmar_token,
+    enviar_mail_reiniciar_password
+    )
 
 
 class DonanteRegistroAPI(CreateAPIView):
     permission_classes = [AllowAny]
     queryset = Donante.objects.all()
     serializer_class = DonanteRegistroSerializer
+
+
+Usuario = get_user_model()
 
 
 @api_view(['POST', 'GET'])
@@ -37,7 +43,6 @@ def activar_cuenta(request, token=None):
     se encuentren vencidos y que el usuario no se encuentre ya
     activo.
     '''
-    Usuario = get_user_model()
     if request.method == 'GET':
         key = confirmar_token(token, url=True)
     else:
@@ -65,3 +70,56 @@ def activar_cuenta(request, token=None):
                 {"mensaje": 'Se ha activado correctamente tu cuenta de registro. ¡Gracias!'},
                 status=HTTP_200_OK
             )
+
+
+@api_view(['POST'])
+@permission_classes((AllowAny, ))
+def reset_pass_request(request):
+
+    usuario = Usuario.objects.filter(email=request.data['email'])
+    if usuario.exists():
+        enviar_mail_reiniciar_password(usuario[0])
+        return Response(
+                {"mensaje": 'Pronto recibirás un correo electrónico con las instrucciones para recuperar tu contraseña.'},
+                status=HTTP_200_OK
+            )
+    else:
+        return Response(
+                {"mensaje": 'El correo ingresado no pertenece a ningún usuario, ¿te has registrado anteriormente?'},
+                status=HTTP_400_BAD_REQUEST
+            )
+
+
+@api_view(['POST', 'GET'])
+@permission_classes((AllowAny, ))
+def reset_pass(request, token=None):
+    if request.method == 'GET':
+        email = confirmar_token(token, url=True)
+    else:
+        email = confirmar_token(request.data['token'], url=True)
+
+    if email is False:
+        return Response(
+                    {"mensaje": 'El link de reinicio de constraseña es inválido o ha vencido.'},
+                    status=HTTP_404_NOT_FOUND
+                )
+    else:
+        if request.method == 'POST':
+            usuario = get_object_or_404(Usuario, email=email)
+            if request.data['password'] != request.data['password2']:
+                return Response(
+                        {"mensaje": 'Las contraseñas no coinciden, vuelve a intentar.'},
+                        status=HTTP_400_BAD_REQUEST
+                    )
+            else:
+                usuario.set_password(request.data['password'])
+                usuario.save()
+                return Response(
+                        {"mensaje": '¡Tu contraseña ha sido reiniciada exitosamente!'},
+                        status=HTTP_200_OK
+                    )
+        else:
+            return Response(
+                    {"mensaje": 'El link de reinicio de constraseña es correcto.'},
+                    status=HTTP_200_OK
+                )
