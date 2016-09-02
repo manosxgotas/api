@@ -6,6 +6,7 @@ from aplicaciones.base.models import (
     Donante,
     Evento,
     GrupoSanguineo,
+    HorarioCentroDonacion,
     Nacionalidad,
     ImagenEvento,
     LugarEvento,
@@ -35,17 +36,31 @@ class TipoDocumentoSerializer(ModelSerializer):
 
 
 class DonanteSerializer(ModelSerializer):
-
     class Meta:
         model = Donante
         fields = '__all__'
 
 
+class HorarioCentroDonacionSerializer(ModelSerializer):
+    class Meta:
+        model = HorarioCentroDonacion
+        fields = '__all__'
+
+
 class CentroDonacionSerializer(ModelSerializer):
+    horarios = HorarioCentroDonacionSerializer(many=True)
 
     class Meta:
         model = CentroDonacion
-        fields = '__all__'
+        fields = [
+            'id',
+            'nombre',
+            'tipo',
+            'telefono',
+            'lugarDonacion',
+            'horarios'
+        ]
+        depth = 4
 
 
 class LugarEventoSerializer(ModelSerializer):

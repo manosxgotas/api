@@ -23,6 +23,12 @@ class CentroDonacionListAPI(ListAPIView):
     serializer_class = CentroDonacionSerializer
 
 
+class CentroDonacionInfoAPI(RetrieveAPIView):
+    queryset = CentroDonacion.objects.all()
+    serializer_class = CentroDonacionSerializer
+    lookup_field = 'id'
+
+
 class DonanteListAPI(ListAPIView):
     queryset = Donante.objects.all()
     serializer_class = DonanteSerializer

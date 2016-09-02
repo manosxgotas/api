@@ -396,6 +396,18 @@ class CategoriaEvento(models.Model):
 class CentroDonacion(models.Model):
     nombre = models.CharField(max_length=50)
     tipo = models.ForeignKey('TipoCentroDonacion')
+    telefono = models.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[\d()*-]+$',
+                message='El formato de número de teléfono es incorrecto.'
+            )
+        ],
+        max_length=30,
+        verbose_name='teléfono',
+        blank=True,
+        null=True
+    )
     lugarDonacion = models.OneToOneField('LugarDonacion', related_name='lugarCentro', on_delete=models.CASCADE)
 
     def __str__(self):
