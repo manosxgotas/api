@@ -67,6 +67,7 @@ class LugarEventoSerializer(ModelSerializer):
     class Meta:
         model = LugarEvento
         fields = '__all__'
+        depth = 4
 
 
 class ImagenEventoSerializer(ModelSerializer):
@@ -89,5 +90,7 @@ class EventoSerializer(ModelSerializer):
             'categoria',
             'descripcion',
             'imagenesEvento',
-            'lugarEvento'
+            'lugarEvento',
+            'video'
         ]
+        depth = 1

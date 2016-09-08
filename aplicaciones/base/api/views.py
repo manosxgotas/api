@@ -41,7 +41,7 @@ class EventoInfoAPI(RetrieveAPIView):
 
 
 class EventoListAPI(ListAPIView):
-    queryset = Evento.objects.all()
+    queryset = Evento.objects.all().order_by('-fechaHoraInicio')
     serializer_class = EventoSerializer
 
 
