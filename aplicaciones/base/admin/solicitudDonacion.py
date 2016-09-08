@@ -2,7 +2,14 @@
 
 from django.contrib import admin
 
-from ..models import SolicitudDonacion
+from ..models import (
+    SolicitudDonacion,
+    ImagenSolicitudDonacion
+    )
+
+
+class ImagenSolicitudDonacionInline(admin.TabularInline):
+    model = ImagenSolicitudDonacion
 
 
 class SolicitudDonacionAdmin(admin.ModelAdmin):
@@ -26,5 +33,9 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
         'tipo',
         'centroDonacion'
     )
+
+    inlines = [
+            ImagenSolicitudDonacionInline
+        ]
 
 admin.site.register(SolicitudDonacion, SolicitudDonacionAdmin)

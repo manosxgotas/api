@@ -2,7 +2,19 @@
 
 from django.contrib import admin
 
-from ..models import Evento
+from ..models import (
+    Evento,
+    ImagenEvento,
+    LugarEvento
+    )
+
+
+class ImagenEventoInline(admin.TabularInline):
+    model = ImagenEvento
+
+
+class LugarEventoInline(admin.TabularInline):
+    model = LugarEvento
 
 
 class EventoAdmin(admin.ModelAdmin):
@@ -21,7 +33,12 @@ class EventoAdmin(admin.ModelAdmin):
         'categoria',
     )
 
-    def _categoria(self,obj):
+    inlines = [
+        ImagenEventoInline,
+        LugarEventoInline
+    ]
+
+    def _categoria(self, obj):
         return obj.categoria.nombre
 
 
