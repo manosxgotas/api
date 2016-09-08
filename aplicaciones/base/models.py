@@ -75,11 +75,11 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     # si es un evento.
     if (isinstance(instance, ImagenSolicitudDonacion)):
         owner = str(instance.solicitud.usuario.donante)
-        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + instance.titulo + '/'
+        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + slugify(instance.titulo) + '/'
     # Almacena la imágen en: 'media/eventos/<nombre evento>/'
     # si es un evento.
     if (isinstance(instance, ImagenEvento)):
-        ruta_imagenes_ubicacion = 'eventos/' + instance.evento.nombre + '/'
+        ruta_imagenes_ubicacion = 'eventos/' + slugify(instance.evento.nombre) + '/'
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)

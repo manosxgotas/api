@@ -22,5 +22,4 @@ class LocalidadAdmin(admin.ModelAdmin):
     def _provincia(self, obj):
         return obj.provincia.nombre
 
-
 admin.site.register(Localidad, LocalidadAdmin)

@@ -14,7 +14,4 @@ class NacionalidadAdmin(admin.ModelAdmin):
         'nombre',
     )
 
-
-
-
 admin.site.register(Nacionalidad, NacionalidadAdmin)
