@@ -22,7 +22,7 @@ from .views import (
     EventoInfoAPI,
     GrupoSanguineoListAPI,
     NacionalidadListAPI,
-    TipoDocumentoListAPI
+    TipoDocumentoListAPI,
     )
 
 urlpatterns = [
@@ -40,4 +40,5 @@ urlpatterns = [
     url(r'^donantes/', include('aplicaciones.donantes.api.urls', namespace='donantes')),
     url(r'^direcciones/', include('aplicaciones.direcciones.api.urls', namespace='direcciones')),
     url(r'^donaciones/', include('aplicaciones.donaciones.api.urls', namespace='donaciones')),
+    url(r'^solicitudes/', include('aplicaciones.solicitudes.api.urls', namespace='solicitudes')),
 ]

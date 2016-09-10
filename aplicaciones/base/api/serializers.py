@@ -76,3 +76,4 @@ class EventoSerializer(ModelSerializer):
             'imagenesEvento',
             'lugarEvento'
         ]
+

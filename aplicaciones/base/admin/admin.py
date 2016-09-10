@@ -24,7 +24,9 @@ from ..models import (
     TipoCentroDonacion,
     TipoDocumento,
     TipoSolicitudDonacion,
-    VerificacionDonacion
+    VerificacionDonacion,
+    Paciente,
+    ImagenSolicitudDonacion
     )
 
 from .codigoverificacion import CodigoVerificacionAdmin
@@ -53,3 +55,5 @@ admin.site.register(TipoDocumento)
 admin.site.register(LugarDonacion)
 admin.site.register(LugarEvento)
 admin.site.register(VerificacionDonacion)
+admin.site.register(Paciente)
+admin.site.register(ImagenSolicitudDonacion)

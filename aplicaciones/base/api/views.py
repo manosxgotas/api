@@ -4,7 +4,7 @@ from .serializers import (
     EventoSerializer,
     GrupoSanguineoSerializer,
     NacionalidadSerializer,
-    TipoDocumentoSerializer
+    TipoDocumentoSerializer,
     )
 from aplicaciones.base.models import (
     CentroDonacion,
@@ -55,3 +55,4 @@ class TipoDocumentoListAPI(ListAPIView):
     permission_classes = [AllowAny]
     queryset = TipoDocumento.objects.all()
     serializer_class = TipoDocumentoSerializer
+
