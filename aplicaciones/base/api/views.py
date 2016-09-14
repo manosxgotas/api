@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny
 
 
 class CentroDonacionListAPI(ListAPIView):
+    permission_classes = [AllowAny]
     queryset = CentroDonacion.objects.all()
     serializer_class = CentroDonacionSerializer
 
