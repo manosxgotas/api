@@ -1,117 +1,56 @@
+from allauth.account import app_settings as allauth_settings
+from allauth.utils import email_address_exists
+from allauth.account.adapter import get_adapter
+from allauth.account.utils import setup_user_email
+
 from rest_framework.serializers import (
-    ModelSerializer,
-)
-from aplicaciones.base.models import (
-    Donante,
-    Direccion,
-    RegistroDonacion,
-)
-
-from django.contrib.auth import get_user_model
-from .token import (
-    enviar_mail_activacion
+    Serializer,
+    EmailField,
+    CharField,
+    ValidationError
 )
 
 
-class DireccionRegistroSerializer(ModelSerializer):
+class RegistroSerializer(Serializer):
+    email = EmailField(required=allauth_settings.EMAIL_REQUIRED)
+    email2 = EmailField(required=allauth_settings.EMAIL_REQUIRED)
+    first_name = CharField(required=True, write_only=True)
+    last_name = CharField(required=True, write_only=True)
+    password1 = CharField(required=True, write_only=True)
+    genero = CharField(required=True, write_only=True, max_length=1)
 
-    class Meta:
-        model = Direccion
-        fields = [
-            'calle',
-            'numero',
-            'piso',
-            'numeroDepartamento',
-            'localidad',
-        ]
+    def validate_email(self, email):
+        email = get_adapter().clean_email(email)
+        if allauth_settings.UNIQUE_EMAIL:
+            if email and email_address_exists(email):
+                raise ValidationError(
+                    ("Un usuario ya ha sido registrado con este correo electrónico."))
+        return email
 
-User = get_user_model()
+    def validate_password1(self, password1):
+        return get_adapter().clean_password(password1)
 
+    def validate(self, data):
+        if data['email'] != data['email2']:
+            raise ValidationError(
+                ("Los correos electrónicos no coinciden."))
+        return data
 
-class UsuarioRegistroSerializer(ModelSerializer):
+    def get_cleaned_data(self):
+        return {
+            'first_name': self.validated_data.get('first_name', ''),
+            'last_name': self.validated_data.get('last_name', ''),
+            'password1': self.validated_data.get('password1', ''),
+            'email': self.validated_data.get('email', ''),
+            'genero': self.validated_data.get('genero', '')
+        }
 
-    class Meta:
-        model = User
-        fields = [
-            'username',
-            'email',
-            'first_name',
-            'last_name',
-            'password',
-        ]
-
-    extra_kwargs = {'password': {'write_only': True}}
-
-
-class DonanteRegistroSerializer(ModelSerializer):
-    usuario = UsuarioRegistroSerializer()
-    direccion = DireccionRegistroSerializer()
-
-    class Meta:
-        model = Donante
-        fields = [
-            'usuario',
-            'numeroDocumento',
-            'tipoDocumento',
-            'nacimiento',
-            'telefono',
-            'peso',
-            'altura',
-            'genero',
-            'grupoSanguineo',
-            'direccion',
-            'nacionalidad'
-        ]
-
-    def create(self, validated_data):
-
-        # Obtención de datos del donante
-        numeroDocumento = validated_data.get('numeroDocumento', None)
-        tipoDocumento = validated_data.get('tipoDocumento', None)
-        nacimiento = validated_data['nacimiento']
-        telefono = validated_data.get('telefono', None)
-        peso = validated_data['peso']
-        altura = validated_data['altura']
-        genero = validated_data['genero']
-        grupoSanguineo = validated_data.get('grupoSanguineo', None)
-        nacionalidad = validated_data.get('nacionalidad', None)
-
-        # Obtención de datos del usuario
-        usuario_data = validated_data.pop('usuario')
-        usuario = User(**usuario_data)
-        usuario.is_active = False
-        # Seteo la password mediante el método set_password
-        # para que la misma sea encriptada.
-        usuario.set_password(usuario_data['password'])
-        usuario.save()
-
-        # Creación de la instancia de Donante
-        donante_obj = Donante(
-            usuario=usuario,
-            numeroDocumento=numeroDocumento,
-            tipoDocumento=tipoDocumento,
-            nacimiento=nacimiento,
-            telefono=telefono,
-            peso=peso,
-            altura=altura,
-            genero=genero,
-            grupoSanguineo=grupoSanguineo,
-            nacionalidad=nacionalidad
-        )
-
-        # Obtención de los datos de la dirección
-        direccion_data = validated_data.pop('direccion', None)
-        if direccion_data is not None:
-            direccion = Direccion(**direccion_data)
-            direccion.save()
-
-            donante_obj.direccion = direccion
-
-        donante_obj.save()
-
-        # Creación de instancia de Registro de donación asociada con la instancia de Donante
-        RegistroDonacion.objects.create(donante=donante_obj)
-
-        enviar_mail_activacion(usuario)
-
-        return donante_obj
+    def save(self, request):
+        adapter = get_adapter()
+        user = adapter.new_user(request)
+        self.cleaned_data = self.get_cleaned_data()
+        adapter.save_user(request, user, self)
+        setup_user_email(request, user, [])
+        user.donante.genero = self.cleaned_data['genero']
+        user.save()
+        return user

@@ -15,21 +15,25 @@ from rest_framework.status import (
 from aplicaciones.base.models import (
     Donante,
     )
-from .serializers import (
-    DonanteRegistroSerializer,
-    )
 
 from .token import (
     confirmar_token,
     enviar_mail_reiniciar_password
     )
 
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from rest_auth.registration.views import SocialLoginView
 
-class DonanteRegistroAPI(CreateAPIView):
+
+class FacebookLogin(SocialLoginView):
     permission_classes = [AllowAny]
-    queryset = Donante.objects.all()
-    serializer_class = DonanteRegistroSerializer
+    adapter_class = FacebookOAuth2Adapter
 
+
+class GoogleLogin(SocialLoginView):
+    permission_classes = [AllowAny]
+    adapter_class = GoogleOAuth2Adapter
 
 Usuario = get_user_model()
 
