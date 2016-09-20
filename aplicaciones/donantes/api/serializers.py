@@ -100,7 +100,6 @@ class LocalidadUpdateSerializer(ModelSerializer):
         model = Localidad
         fields = [
             'id',
-            'nombre',
             'provincia'
         ]
 
@@ -121,7 +120,6 @@ class DireccionUpdateSerializer(ModelSerializer):
 
 class DonanteUpdateSerializer(ModelSerializer):
     usuario = UsuarioUpdateSerializer()
-    direccion = DireccionUpdateSerializer()
 
     class Meta:
         model = Donante
@@ -135,7 +133,6 @@ class DonanteUpdateSerializer(ModelSerializer):
             'altura',
             'genero',
             'grupoSanguineo',
-            'direccion',
             'nacionalidad'
         ]
 
@@ -160,37 +157,56 @@ class DonanteUpdateSerializer(ModelSerializer):
 
         usuario.save()
 
-        direccion_data = validated_data.pop('direccion')
-        direccion = instance.direccion
-
-        direccion.calle = direccion_data.get('calle', direccion.calle)
-        direccion.numero = direccion_data.get('numero', direccion.numero)
-        direccion.piso = direccion_data.get('piso', direccion.piso)
-        direccion.numeroDepartamento = direccion_data.get('numeroDepartamento', direccion.numeroDepartamento)
-
-        localidad_data = direccion_data.pop('localidad')
-
-        try:
-            localidad_obj = Localidad.objects.get(id=localidad_data.get('id'))
-        except:
-            localidad_obj = direccion.localidad
-
-        if localidad_obj:
-            direccion.localidad = localidad_obj
-
-        direccion.save()
-
         return instance
 
 
-class DonanteAvatarSerializer(ModelSerializer):
+class DonanteUpdateDireccionSerializer(ModelSerializer):
+    direccion = DireccionUpdateSerializer()
+
+    class Meta:
+        model = Donante
+        fields = ['direccion']
+
+    def update(self, instance, validated_data):
+        direccion_data = validated_data.pop('direccion')
+        localidad_data = direccion_data.pop('localidad')
+        if instance.direccion is not None:
+            direccion = instance.direccion
+
+            direccion.calle = direccion_data.get('calle', direccion.calle)
+            direccion.numero = direccion_data.get('numero', direccion.numero)
+            direccion.piso = direccion_data.get('piso', direccion.piso)
+            direccion.numeroDepartamento = direccion_data.get('numeroDepartamento', direccion.numeroDepartamento)
+
+            localidad_obj = Localidad.objects.filter(id=localidad_data.get('id'))
+            if localidad_obj.exists():
+                direccion.localidad = localidad_obj.first()
+            direccion.save()
+
+        else:
+            instance.direccion = Direccion.objects.create(
+                    calle=direccion_data['calle'],
+                    numero=direccion_data['numero'],
+                    piso=direccion_data.get('piso', None),
+                    numeroDepartamento=direccion_data.get('numeroDepartamento', None),
+                    localidad=Localidad.objects.get(id=localidad_data['id'])
+                )
+
+        instance.save()
+        return instance
+
+
+class DonanteUpdateAvatarSerializer(ModelSerializer):
     class Meta:
         model = Donante
         fields = ['foto']
 
     def update(self, instance, validated_data):
-        instance.foto.delete()
-        instance.foto = validated_data['foto']
-        instance.save()
+        foto_nueva = validated_data.get('foto', None)
+        if foto_nueva:
+            if instance.foto:
+                instance.foto.delete()
+            instance.foto = foto_nueva
+            instance.save()
 
         return instance
