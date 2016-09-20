@@ -17,6 +17,9 @@ from django.core.validators import (
     MaxValueValidator,
     RegexValidator
     )
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from allauth.account.signals import user_signed_up
 from geoposition.fields import GeopositionField
 
 DIAS_SEMANA = {
@@ -118,7 +121,7 @@ class SentimientosField(models.CharField):
 
 
 class Donante(models.Model):
-    usuario = models.OneToOneField(User)
+    usuario = models.OneToOneField(User, related_name='donante')
     numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento', blank=True, null=True)
     tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento', null=True, blank=True)
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
@@ -134,19 +137,44 @@ class Donante(models.Model):
         blank=True,
         null=True
     )
-    nacimiento = models.DateField(verbose_name='fecha de nacimiento')
-    peso = models.DecimalField(max_digits=4, decimal_places=1)
-    altura = models.PositiveIntegerField(validators=[MinValueValidator(100), MaxValueValidator(350)])
-    genero = GenerosField(verbose_name='género')
+    nacimiento = models.DateField(verbose_name='fecha de nacimiento', null=True)
+    peso = models.DecimalField(max_digits=4, decimal_places=1, null=True)
+    altura = models.PositiveIntegerField(null=True, validators=[MinValueValidator(100), MaxValueValidator(350)])
+    genero = GenerosField(verbose_name='género', null=True)
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', blank=True, null=True, verbose_name='grupo sanguíneo')
     direccion = models.ForeignKey('Direccion', verbose_name='dirección', null=True, blank=True)
-    nacionalidad = models.ForeignKey('Nacionalidad')
+    nacionalidad = models.ForeignKey('Nacionalidad', null=True)
 
     def get_genero(self):
         return GENEROS.get(self.genero)
 
     def __str__(self):
         return self.usuario.username
+
+    @receiver(post_save, sender=User)
+    def create_user_profile(sender, instance, created, **kwargs):
+        if created:
+            donante_obj = Donante.objects.create(usuario=instance)
+            RegistroDonacion.objects.create(donante=donante_obj)
+
+    @receiver(post_save, sender=User)
+    def save_user_profile(sender, instance, created, **kwargs):
+        instance.donante.save()
+
+    @receiver(user_signed_up)
+    def set_gender_profile(sender, **kwargs):
+        user = kwargs.pop('user')
+        social_account = user.socialaccount_set.filter(provider='facebook')
+        if social_account.exists():
+            extra_data = social_account[0].extra_data
+            genero = extra_data['gender']
+
+            if genero == 'male':
+                user.donante.genero = "1"
+            else:
+                user.donante.genero = "2"
+
+            user.save()
 
 
 class Nacionalidad(models.Model):
