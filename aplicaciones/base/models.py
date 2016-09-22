@@ -74,8 +74,8 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     # Almacena la imágen en: 'media/solicitudes/imagenes/<nombre usuario>/<titulo solicitud>'
     # si es un evento.
     if (isinstance(instance, ImagenSolicitudDonacion)):
-        owner = str(instance.solicitud.usuario.donante)
-        ruta_imagenes_ubicacion = 'solicitudes/imagenes/' + owner + '/' + instance.titulo + '/'
+        owner = str(instance.solicitud.donante)
+        ruta_imagenes_ubicacion = 'solicitudes/imagenes/' + owner + '/' + instance.solicitud.titulo + '/'
     # Almacena la imágen en: 'media/eventos/<nombre evento>/'
     # si es un evento.
     if (isinstance(instance, ImagenEvento)):
@@ -333,18 +333,19 @@ class TipoSolicitudDonacion(models.Model):
 
 class ImagenSolicitudDonacion(models.Model):
     imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
+    portada = models.BooleanField(default=False)
     solicitud = models.ForeignKey('SolicitudDonacion', related_name='imagenesSolicitud')
 
     def __str__(self):
-        return self.id
-
+        return str(self.id)
+        
     class Meta:
         verbose_name = 'imagen de solicitud de donación'
         verbose_name_plural = 'imágenes de solicitud de donación'
 
 
 class GrupoSanguineoSolicitud(models.Model):
-    solicitud = models.ForeignKey('SolicitudDonacion')
+    solicitud = models.ForeignKey('SolicitudDonacion',related_name='gruposSanguineos')
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', verbose_name='grupo sanguíneo')
 
     def __str__(self):
@@ -400,6 +401,18 @@ class CategoriaEvento(models.Model):
 class CentroDonacion(models.Model):
     nombre = models.CharField(max_length=50)
     tipo = models.ForeignKey('TipoCentroDonacion')
+    telefono = models.CharField(
+        validators=[
+            RegexValidator(
+                regex=r'^\+?[\d()*-]+$',
+                message='El formato de número de teléfono es incorrecto.'
+            )
+        ],
+        max_length=30,
+        verbose_name='teléfono',
+        blank=True,
+        null=True
+    )
     lugarDonacion = models.OneToOneField('LugarDonacion', related_name='lugarCentro', on_delete=models.CASCADE)
 
     def __str__(self):

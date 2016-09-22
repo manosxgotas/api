@@ -5,6 +5,7 @@ from .serializers import (
     GrupoSanguineoSerializer,
     NacionalidadSerializer,
     TipoDocumentoSerializer,
+    GrupoSanguineoInfoSerializer
     )
 from aplicaciones.base.models import (
     CentroDonacion,
@@ -23,6 +24,12 @@ class CentroDonacionListAPI(ListAPIView):
     serializer_class = CentroDonacionSerializer
 
 
+class CentroDonacionInfoAPI(RetrieveAPIView):
+    queryset = CentroDonacion.objects.all()
+    serializer_class = CentroDonacionSerializer
+    lookup_field = 'id'
+
+
 class DonanteListAPI(ListAPIView):
     queryset = Donante.objects.all()
     serializer_class = DonanteSerializer
@@ -35,7 +42,7 @@ class EventoInfoAPI(RetrieveAPIView):
 
 
 class EventoListAPI(ListAPIView):
-    queryset = Evento.objects.all()
+    queryset = Evento.objects.all().order_by('-fechaHoraInicio')
     serializer_class = EventoSerializer
 
 
@@ -43,7 +50,6 @@ class GrupoSanguineoListAPI(ListAPIView):
     permission_classes = [AllowAny]
     queryset = GrupoSanguineo.objects.all()
     serializer_class = GrupoSanguineoSerializer
-
 
 class NacionalidadListAPI(ListAPIView):
     permission_classes = [AllowAny]
@@ -56,3 +62,7 @@ class TipoDocumentoListAPI(ListAPIView):
     queryset = TipoDocumento.objects.all()
     serializer_class = TipoDocumentoSerializer
 
+class GrupoSanguineoInfoAPI(ListAPIView):
+    queryset = GrupoSanguineo.objects.all()
+    serializer_class = GrupoSanguineoInfoSerializer
+    lookup_field = 'id'

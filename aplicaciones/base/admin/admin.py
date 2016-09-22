@@ -8,7 +8,6 @@ from ..models import (
     Donacion,
     Donante,
     EstadoDonacion,
-    EstadoSolicitudDonacion,
     Evento,
     GrupoSanguineo,
     GrupoSanguineoSolicitud,
@@ -39,7 +38,6 @@ admin.site.register(Donante)
 admin.site.register(GrupoSanguineo)
 admin.site.register(SolicitudDonacion)
 admin.site.register(TipoSolicitudDonacion)
-admin.site.register(EstadoSolicitudDonacion)
 admin.site.register(RegistroDonacion)
 admin.site.register(Donacion)
 admin.site.register(HistoricoEstadoDonacion)

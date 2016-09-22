@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import (
     ModelSerializer,
     )
@@ -6,6 +7,7 @@ from aplicaciones.base.models import (
     Donante,
     Evento,
     GrupoSanguineo,
+    HorarioCentroDonacion,
     Nacionalidad,
     ImagenEvento,
     LugarEvento,
@@ -14,11 +16,10 @@ from aplicaciones.base.models import (
 
 
 class GrupoSanguineoSerializer(ModelSerializer):
-
+    
     class Meta:
         model = GrupoSanguineo
         fields = '__all__'
-
 
 class NacionalidadSerializer(ModelSerializer):
 
@@ -35,23 +36,38 @@ class TipoDocumentoSerializer(ModelSerializer):
 
 
 class DonanteSerializer(ModelSerializer):
-
     class Meta:
         model = Donante
         fields = '__all__'
 
 
+class HorarioCentroDonacionSerializer(ModelSerializer):
+    class Meta:
+        model = HorarioCentroDonacion
+        fields = '__all__'
+
+
 class CentroDonacionSerializer(ModelSerializer):
+    horarios = HorarioCentroDonacionSerializer(many=True)
 
     class Meta:
         model = CentroDonacion
-        fields = '__all__'
+        fields = [
+            'id',
+            'nombre',
+            'tipo',
+            'telefono',
+            'lugarDonacion',
+            'horarios'
+        ]
+        depth = 4
 
 
 class LugarEventoSerializer(ModelSerializer):
     class Meta:
         model = LugarEvento
         fields = '__all__'
+        depth = 4
 
 
 class ImagenEventoSerializer(ModelSerializer):
@@ -74,6 +90,13 @@ class EventoSerializer(ModelSerializer):
             'categoria',
             'descripcion',
             'imagenesEvento',
-            'lugarEvento'
+            'lugarEvento',
+            'video'
         ]
+        depth = 1
 
+class GrupoSanguineoInfoSerializer(ModelSerializer):
+    class Meta:
+        model = GrupoSanguineo
+        fields = '__all__'
+        depth = 1

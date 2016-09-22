@@ -1,10 +1,15 @@
 import datetime
-
+import json
+from django.db import transaction
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
     DictField,
-    FileField
+    FileField,
+    ListField,
+    JSONField,
+    ImageField,
+    IntegerField
     )
 from rest_framework.validators import ValidationError
 from aplicaciones.base.models import (
@@ -16,7 +21,7 @@ from aplicaciones.base.models import (
     GrupoSanguineo,
     ImagenSolicitudDonacion
     )
-
+from aplicaciones.base.api.serializers import CentroDonacionSerializer
 
 def validate_fechaHora(fechaInicio,fechaFin):
     if fechaFin < fechaInicio:
@@ -26,7 +31,7 @@ def validate_fechaHora(fechaInicio,fechaFin):
             raise ValidationError('La fecha de inicio no puede ser menor a la fecha actual')
 
 
-class DireccionPacienteSerializer(ModelSerializer):
+class DireccionSerializer(ModelSerializer):
 
     class Meta:
         model = Direccion
@@ -37,16 +42,70 @@ class DireccionPacienteSerializer(ModelSerializer):
             'numeroDepartamento',
             'localidad',
         ]
+class ImagenSolicitudDonacionSerializer(ModelSerializer):
+
+    class Meta:
+        model = ImagenSolicitudDonacion
+        fields = '__all__'
 
 
+class GrupoSanguineoSerializer(ModelSerializer):
+    class Meta:
+        model = GrupoSanguineo
+        fields = [
+            'nombre'
+        ]
 
-class SolicitudDonacionCreateSerializer (ModelSerializer):
-    gruposSanguineo = DictField(required=False)
-    video = FileField(required=False)
-    imagenes = DictField(required=False)
+class GrupoSanguineoSolicitudSerializer(ModelSerializer):
+    grupoSanguineo = GrupoSanguineoSerializer()
+    class Meta:
+        model = GrupoSanguineoSolicitud
+        fields = [
+            'solicitud',
+            'grupoSanguineo',
+        ]
+
+class SolicitudDonacionListadoSerializer(ModelSerializer):
+    gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
+    imagenesSolicitud = ImagenSolicitudDonacionSerializer(many=True)
     class Meta:
         model = SolicitudDonacion
-        fields = '__all__'
+        fields = [
+            'id',
+            'titulo',
+            'fechaPublicacion',
+            'donantesNecesarios',
+            'video',
+            'fechaHoraInicio',
+            'fechaHoraFin',
+            'tipo',
+            'centroDonacion',
+            'paciente',
+            'donante',
+            'gruposSanguineos',
+            'imagenesSolicitud'
+        ]
+
+class SolicitudDonacionCreateSerializer (ModelSerializer):
+    grupos = ListField(required=False)
+    video = FileField(required=False)
+    imagenes = ListField(required=False)
+    class Meta:
+        model = SolicitudDonacion
+        fields = [
+            'titulo',
+            'fechaPublicacion',
+            'donantesNecesarios',
+            'video',
+            'fechaHoraInicio',
+            'fechaHoraFin',
+            'tipo',
+            'centroDonacion',
+            'paciente',
+            'donante',
+            'grupos',
+            'imagenes'
+        ]
         
 
     def create(self,validated_data):
@@ -62,9 +121,7 @@ class SolicitudDonacionCreateSerializer (ModelSerializer):
         centroDonacion = validated_data['centroDonacion']
         paciente = validated_data['paciente']
         donante = validated_data['donante']
-        
-
-        
+      
         validate_fechaHora(fechaHoraInicio,fechaHoraFin)
         # Creo objeto SolicitudDonacion
 
@@ -79,39 +136,72 @@ class SolicitudDonacionCreateSerializer (ModelSerializer):
             centroDonacion=centroDonacion,
             paciente=paciente,
             donante=donante
-            )
+        )
 
         solicitudDonacion.save()
 
         #Obtengo los grupos sanguineos necesarios para la donacion
-        gruposSanguineo = validated_data.pop('gruposSanguineo')
+        grupos = validated_data.pop('grupos')
         #Le asocio cada grupo sanguineo a la solicitud
-        for val in gruposSanguineo:
-            grupoSanguineo = GrupoSanguineo.objects.get(id=val)
-            grupoSanguineoSolicitud = GrupoSanguineoSolicitud.objects.create(
-                solicitud=solicitudDonacion,
-                grupoSanguineo=grupoSanguineo
-                )
-            grupoSanguineoSolicitud.save()
+    
+        for val in grupos:
+            #Convierto de json a list
+            val = json.loads(val)
+            # for each sobre la lista
+            for valor in val:
+                if (int(valor)):
+                    grupoSanguineo = GrupoSanguineo.objects.get(id=valor)
+                    grupoSanguineoSolicitud = GrupoSanguineoSolicitud.objects.create(
+                        solicitud=solicitudDonacion,
+                        grupoSanguineo=grupoSanguineo
+                    )
+                    grupoSanguineoSolicitud.save()
             
-        imagenes = validated_data.pop('imagenes')
-
-        for value in imagenes:
-            imagenSolicitudDonacion = ImagenSolicitudDonacion.objects.create(
-                imagen=value,
-                solicitud=solicitudDonacion
-                )
-            imagenSolicitudDonacion.save()
+            imagenes = validated_data.get('imagenes')
+            for value in imagenes:
+                print(type(value))
+                print(value)
+                value = json.loads(value)
+                print(type(value))
+                print(value)
+                for val in value:
+                    print(val)
+                    imagenSolicitudDonacion = ImagenSolicitudDonacion.objects.create(
+                        imagen=val,
+                        solicitud=solicitudDonacion
+                    )
+                    imagenSolicitudDonacion.save()
+            
 
         return solicitudDonacion
 
-
-
-class SolicitudDonacionInfoSerializer (ModelSerializer):
+class PacienteInfoSerializer(ModelSerializer):
     class Meta:
-        model = SolicitudDonacion
+        model = Paciente
         fields = '__all__'
 
+class SolicitudDonacionInfoSerializer (ModelSerializer):
+    centroDonacion = CentroDonacionSerializer()
+    paciente = PacienteInfoSerializer()
+    gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
+    imagenesSolicitud = ImagenSolicitudDonacionSerializer(many=True)
+    class Meta:
+        model = SolicitudDonacion
+        fields = [
+            'titulo',
+            'fechaPublicacion',
+            'donantesNecesarios',
+            'video',
+            'fechaHoraInicio',
+            'fechaHoraFin',
+            'tipo',
+            'centroDonacion',
+            'paciente',
+            'donante',
+            'gruposSanguineos',
+            'imagenesSolicitud'
+        ]
+        
 class TipoSolicitudSerializer(ModelSerializer):
 
     class Meta:
@@ -119,11 +209,13 @@ class TipoSolicitudSerializer(ModelSerializer):
         fields = '__all__'
 
 class PacienteCreateSerializer(ModelSerializer):
-    direccion = DireccionPacienteSerializer()
+    direccion = DireccionSerializer()
 
     class Meta:
         model = Paciente
-        fields = '__all__'
+        fields = [
+            'nombre'
+        ]
 
     def create(self,validated_data):
 

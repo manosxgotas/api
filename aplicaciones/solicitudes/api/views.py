@@ -1,6 +1,6 @@
 import datetime
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
+from rest_framework.parsers import FormParser, MultiPartParser, JSONParser, FileUploadParser
 from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
@@ -12,14 +12,18 @@ from rest_framework.generics import (
 from aplicaciones.base.models import (
 	SolicitudDonacion,
 	TipoSolicitudDonacion,
-	Paciente
+	Paciente,
+	GrupoSanguineoSolicitud
 
 	)
 from .serializers import (
 	SolicitudDonacionCreateSerializer,
 	SolicitudDonacionInfoSerializer,
 	TipoSolicitudSerializer,
-	PacienteCreateSerializer
+	PacienteCreateSerializer,
+	SolicitudDonacionListadoSerializer,
+	GrupoSanguineoSolicitudSerializer,
+	PacienteInfoSerializer
 
 	)
 
@@ -44,6 +48,11 @@ class SolicitudDonacionCreateAPI(CreateAPIView):
 	serializer_class = SolicitudDonacionCreateSerializer	
 	queryset = SolicitudDonacion.objects.all()
 	parser_classes = [FormParser, MultiPartParser, JSONParser]
+
+class SolicitudesInfoAPI(ListAPIView):
+	permissions_class = [IsAuthenticatedOrReadOnly]
+	serializer_class = SolicitudDonacionListadoSerializer
+	queryset = SolicitudDonacion.objects.all()
 
 class PacienteCreateAPI(CreateAPIView):
 	permissions_class = [IsAuthenticatedOrReadOnly]
