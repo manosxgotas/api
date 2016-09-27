@@ -29,7 +29,7 @@ from aplicaciones.base.models import (
     )
 
 from .serializers import (
-    DonacionCreateUpdateDestroySerializer,
+    create_update_destroy_donacion_serializer,
     DonacionPerfilSerializer,
     VerificarImagenDonacionSerializer
     )
@@ -39,22 +39,37 @@ class DonacionCreateAPI(CreateAPIView):
     permission_classes = [IsOwnerDonacion]
     queryset = Donacion.objects.all()
     parser_classes = [FormParser, MultiPartParser, JSONParser]
-    serializer_class = DonacionCreateUpdateDestroySerializer
+
+    def get_serializer_class(self):
+        usuario = self.request.user
+        return create_update_destroy_donacion_serializer(
+                usuario=usuario
+            )
 
 
 class DonacionUpdateAPI(UpdateAPIView):
     permission_classes = [IsOwnerDonacion]
     queryset = Donacion.objects.all()
     parser_classes = [FormParser, MultiPartParser, JSONParser]
-    serializer_class = DonacionCreateUpdateDestroySerializer
     lookup_field = 'id'
+
+    def get_serializer_class(self):
+        usuario = self.request.user
+        return create_update_destroy_donacion_serializer(
+                usuario=usuario
+            )
 
 
 class DonacionDestroyAPI(DestroyAPIView):
     permission_classes = [IsOwnerDonacion]
     queryset = Donacion.objects.all()
-    serializer_class = DonacionCreateUpdateDestroySerializer
     lookup_field = 'id'
+
+    def get_serializer_class(self):
+        usuario = self.request.user
+        return create_update_destroy_donacion_serializer(
+                usuario=usuario
+            )
 
 
 class DonacionInfoAPI(RetrieveAPIView):
