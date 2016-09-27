@@ -5,7 +5,6 @@ from .direccion import *
 from .donacion import *
 from .donante import *
 from .estadoDonacion import *
-from .estadoSolicitudDonacion import *
 from .evento import *
 from .grupoSanguineo import *
 from .grupoSanguineoSolicitud import *

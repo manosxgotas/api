@@ -23,13 +23,11 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
         'titulo',
         'fechaPublicacion',
         'tipo',
-        'estado',
         'centroDonacion',
         'paciente',
     )
 
     list_filter = (
-        'estado',
         'tipo',
         'centroDonacion'
     )
