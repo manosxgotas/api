@@ -66,81 +66,83 @@ def obtener_lugar_donacion(datos_ingresados):
     return lugar_donacion
 
 
-class DonacionCreateUpdateDestroySerializer(ModelSerializer):
-    centroDonacion = CharField(write_only=True, required=False)
-    evento = CharField(write_only=True, required=False)
-    direccion = JSONField(binary=True, write_only=True, required=False)
+def create_update_destroy_donacion_serializer(usuario):
+    class DonacionCreateUpdateDestroySerializer(ModelSerializer):
+        centroDonacion = CharField(write_only=True, required=False)
+        evento = CharField(write_only=True, required=False)
+        direccion = JSONField(binary=True, write_only=True, required=False)
 
-    class Meta:
-        model = Donacion
-        fields = [
-            'fechaHora',
-            'foto',
-            'registro',
-            'descripcion',
-            'centroDonacion',
-            'evento',
-            'direccion'
-        ]
+        class Meta:
+            model = Donacion
+            fields = [
+                'fechaHora',
+                'foto',
+                'descripcion',
+                'centroDonacion',
+                'evento',
+                'direccion'
+            ]
 
-    def validate_fechaHora(self, value):
-        if value > datetime.datetime.now():
-            raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
-        return value
+        def validate_fechaHora(self, value):
+            if value > datetime.datetime.now():
+                raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
+            return value
 
-    def create(self, validated_data):
+        def create(self, validated_data):
 
-        # Obtengo datos ingresados.
-        fechaHora = validated_data['fechaHora']
-        foto = validated_data.get('foto', None)
-        registro = validated_data.get('registro')
-        descripcion = validated_data.get('descripcion', '')
-        estado = validated_data.get('estado', None)
+            # Obtengo datos ingresados.
+            fechaHora = validated_data['fechaHora']
+            foto = validated_data.get('foto', None)
+            descripcion = validated_data.get('descripcion', '')
+            estado = validated_data.get('estado', None)
+            registro = usuario.donante.registro
 
-        lugar_donacion = obtener_lugar_donacion(validated_data)
+            lugar_donacion = obtener_lugar_donacion(validated_data)
 
-        # Creo objeto donación
-        donacion = Donacion.objects.create(
-            fechaHora=fechaHora,
-            foto=foto,
-            registro=registro,
-            descripcion=descripcion,
-            lugarDonacion=lugar_donacion,
-            estado=estado
-            )
+            # Creo objeto donación
+            donacion = Donacion.objects.create(
+                fechaHora=fechaHora,
+                foto=foto,
+                registro=registro,
+                descripcion=descripcion,
+                lugarDonacion=lugar_donacion,
+                estado=estado
+                )
 
-        # Seteo estado 'Sin verificar' a la donación.
-        estado = EstadoDonacion.objects.get(nombre='Sin verificar')
+            # Seteo estado 'Sin verificar' a la donación.
+            estado = EstadoDonacion.objects.get(nombre='Sin verificar')
 
-        historico = HistoricoEstadoDonacion(
-            inicio=datetime.datetime.now(),
-            estado=estado,
-            donacion=donacion
-            )
+            historico = HistoricoEstadoDonacion(
+                inicio=datetime.datetime.now(),
+                estado=estado,
+                donacion=donacion
+                )
 
-        historico.save()
+            historico.save()
 
-        return donacion
+            return donacion
 
-    def update(self, instance, validated_data):
-        instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
-        instance.descripcion = validated_data.get('descripcion', instance.descripcion)
-        instance.estado = validated_data.get('estado', instance.estado)
+        def update(self, instance, validated_data):
+            instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
+            instance.descripcion = validated_data.get('descripcion', instance.descripcion)
+            instance.estado = validated_data.get('estado', instance.estado)
 
-        foto_nueva = validated_data.get('foto', None)
+            foto_nueva = validated_data.get('foto', None)
 
-        # Si existe nueva foto la seteo a la instancia.
-        if foto_nueva is not None:
-            if instance.foto:
-                instance.foto.delete()
-            instance.foto = foto_nueva
+            # Si existe nueva foto la seteo a la instancia.
+            if foto_nueva is not None:
+                if instance.foto:
+                    instance.foto.delete()
+                instance.foto = foto_nueva
 
-        nuevo_lugar_donacion = obtener_lugar_donacion(validated_data)
+            nuevo_lugar_donacion = obtener_lugar_donacion(validated_data)
 
-        instance.lugarDonacion = nuevo_lugar_donacion
+            instance.lugarDonacion = nuevo_lugar_donacion
 
-        instance.save()
-        return instance
+            instance.save()
+            return instance
+
+    return DonacionCreateUpdateDestroySerializer
 
 
 class DonacionPerfilSerializer(ModelSerializer):
@@ -163,7 +165,6 @@ class DonacionPerfilSerializer(ModelSerializer):
 
 class RegistroDonacionSerializer(ModelSerializer):
     donaciones = DonacionPerfilSerializer(many=True)
-    depth = 1
 
     class Meta:
         model = RegistroDonacion
@@ -172,6 +173,7 @@ class RegistroDonacionSerializer(ModelSerializer):
             'privado',
             'donaciones'
         ]
+        depth = 1
 
 
 class VerificarImagenDonacionSerializer(ModelSerializer):
