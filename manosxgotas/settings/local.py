@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'aplicaciones.cuentas',
     'aplicaciones.donantes',
     'aplicaciones.direcciones',
+    'aplicaciones.solicitudes',
 
     'corsheaders',
     'rest_framework',

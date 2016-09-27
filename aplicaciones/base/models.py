@@ -74,15 +74,21 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
         owner = str(instance.donacion.registro.donante)
         donacion = str(instance.donacion)
         ruta_imagenes_ubicacion = 'donaciones/' + owner + '/verificaciones/' + donacion + '/'
-    # Almacena la imágen en: 'media/solicitudes/<nombre usuario>/<titulo solicitud>'
+    # Almacena la imágen en: 'media/solicitudes/imagenes/<nombre usuario>/<titulo solicitud>'
     # si es un evento.
     if (isinstance(instance, ImagenSolicitudDonacion)):
-        owner = str(instance.solicitud.usuario.donante)
-        ruta_imagenes_ubicacion = 'solicitudes/' + owner + '/' + slugify(instance.titulo) + '/'
+        owner = str(instance.solicitud.donante)
+        ruta_imagenes_ubicacion = 'solicitudes/imagenes/' + owner + '/' + slugify(instance.solicitud.titulo) + '/'
     # Almacena la imágen en: 'media/eventos/<nombre evento>/'
     # si es un evento.
     if (isinstance(instance, ImagenEvento)):
         ruta_imagenes_ubicacion = 'eventos/' + slugify(instance.evento.nombre) + '/'
+    # Almacena el video en: 'media/solicitudes/videos/<nombre usuario>/<titulo solicitud>'
+    # si es un evento.
+    if (isinstance(instance, SolicitudDonacion)):
+        owner = str(instance.donante)
+        ruta_imagenes_ubicacion = 'solicitudes/videos/' + owner + '/' + slugify(instance.titulo) + '/'
+
     extension_imagen = imagename.split('.')[-1] if '.' in imagename else ''
     nombre_imagen = '%s.%s' % (slugify(str(instance)), extension_imagen)
     return os.path.join(ruta_imagenes_ubicacion, nombre_imagen)
@@ -313,33 +319,20 @@ class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
     fechaPublicacion = models.DateField(verbose_name='fecha de publicación')
     donantesNecesarios = models.SmallIntegerField(verbose_name='cantidad de donantes necesarios')
-    video = models.FileField(blank=True, null=True)
+    video = models.FileField(blank=True, null=True,upload_to=establecer_destino_imagen_ubicacion)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de fin')
-    estado = models.ForeignKey('EstadoSolicitudDonacion', verbose_name='estado de solicitud de donación')
     tipo = models.ForeignKey('TipoSolicitudDonacion', verbose_name='tipo de solicitud de donación')
     centroDonacion = models.ForeignKey('CentroDonacion', null=True, blank=True, verbose_name='centro de donación')
     paciente = models.ForeignKey('Paciente')
     donante = models.ForeignKey('Donante')
 
     def __str__(self):
-        return self.fechaPublicacion + '-' + self.titulo
+        return self.titulo
 
     class Meta:
         verbose_name = 'solicitud de donación'
         verbose_name_plural = 'solicitudes de donación'
-
-
-class EstadoSolicitudDonacion(models.Model):
-    nombre = models.CharField(max_length=20)
-    descripcion = models.TextField(blank=True, verbose_name='descripción')
-
-    def __str__(self):
-        return self.nombre
-
-    class Meta:
-        verbose_name = 'estado de solicitud de donación'
-        verbose_name_plural = 'estados de solicitud de donación'
 
 
 class TipoSolicitudDonacion(models.Model):
@@ -356,10 +349,11 @@ class TipoSolicitudDonacion(models.Model):
 
 class ImagenSolicitudDonacion(models.Model):
     imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
+    portada = models.BooleanField(default=False)
     solicitud = models.ForeignKey('SolicitudDonacion', related_name='imagenesSolicitud')
 
     def __str__(self):
-        return self.id
+        return str(self.id)
 
     class Meta:
         verbose_name = 'imagen de solicitud de donación'
@@ -367,11 +361,11 @@ class ImagenSolicitudDonacion(models.Model):
 
 
 class GrupoSanguineoSolicitud(models.Model):
-    solicitud = models.ForeignKey('SolicitudDonacion')
+    solicitud = models.ForeignKey('SolicitudDonacion',related_name='gruposSanguineos')
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', verbose_name='grupo sanguíneo')
 
     def __str__(self):
-        return self.id + '-' + self.solicitud.__str__ + '-' + self.grupoSanguineo.nombre
+        return str(self.id)
 
     class Meta:
         verbose_name = 'grupo sanguíneo de la solicitud de donación'
@@ -491,7 +485,7 @@ class Paciente(models.Model):
         null=True
     )
     genero = GenerosField()
-    direccion = models.ForeignKey('Direccion', verbose_name='dirección')
+    direccion = models.ForeignKey('Direccion', verbose_name='dirección',blank=True,null=True)
 
     def __str__(self):
         return self.nombre + ' ' + self.apellido

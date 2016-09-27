@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import (
     ModelSerializer,
     )
@@ -93,4 +94,11 @@ class EventoSerializer(ModelSerializer):
             'lugarEvento',
             'video'
         ]
+        depth = 1
+
+
+class GrupoSanguineoInfoSerializer(ModelSerializer):
+    class Meta:
+        model = GrupoSanguineo
+        fields = '__all__'
         depth = 1
