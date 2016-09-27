@@ -214,7 +214,14 @@ class PacienteCreateSerializer(ModelSerializer):
     class Meta:
         model = Paciente
         fields = [
-            'nombre'
+            'id',
+            'nombre',
+            'apellido',
+            'email',
+            'nacimiento',
+            'telefono',
+            'genero',
+            'direccion'
         ]
 
     def create(self,validated_data):
