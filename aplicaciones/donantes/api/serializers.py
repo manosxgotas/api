@@ -202,11 +202,10 @@ class DonanteUpdateAvatarSerializer(ModelSerializer):
         fields = ['foto']
 
     def update(self, instance, validated_data):
-        foto_nueva = validated_data.get('foto', None)
-        if foto_nueva:
-            if instance.foto:
-                instance.foto.delete()
-            instance.foto = foto_nueva
-            instance.save()
+        foto_nueva = validated_data.get('foto')
+        if instance.foto:
+            instance.foto.delete()
+        instance.foto = foto_nueva
+        instance.save()
 
         return instance
