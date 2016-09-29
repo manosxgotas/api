@@ -10,6 +10,8 @@ from rest_framework.serializers import (
     ValidationError
 )
 
+from .token import enviar_mail_activacion
+
 
 class RegistroSerializer(Serializer):
     email = EmailField(required=allauth_settings.EMAIL_REQUIRED)
@@ -52,5 +54,7 @@ class RegistroSerializer(Serializer):
         adapter.save_user(request, user, self)
         setup_user_email(request, user, [])
         user.donante.genero = self.cleaned_data['genero']
+        user.is_active = False
         user.save()
+        enviar_mail_activacion(user)
         return user
