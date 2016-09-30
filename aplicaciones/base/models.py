@@ -317,7 +317,7 @@ class VerificacionDonacion(models.Model):
 
 class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
-    fechaPublicacion = models.DateField(verbose_name='fecha de publicación')
+    fechaPublicacion = models.DateField(verbose_name='fecha de publicación', auto_now_add=True)
     donantesNecesarios = models.SmallIntegerField(verbose_name='cantidad de donantes necesarios')
     video = models.FileField(blank=True, null=True,upload_to=establecer_destino_imagen_ubicacion)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
