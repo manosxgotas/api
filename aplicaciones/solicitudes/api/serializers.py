@@ -3,6 +3,7 @@ import json
 from rest_framework.serializers import (
     ModelSerializer,
     FileField,
+    JSONField,
     ListField,
     )
 from rest_framework.validators import ValidationError
@@ -11,19 +12,12 @@ from aplicaciones.base.models import (
     TipoSolicitudDonacion,
     Direccion,
     Paciente,
+    Localidad,
     GrupoSanguineoSolicitud,
     GrupoSanguineo,
     ImagenSolicitudDonacion
     )
 from aplicaciones.base.api.serializers import CentroDonacionSerializer
-
-
-def validate_fechaHora(fechaInicio, fechaFin):
-    if fechaFin < fechaInicio:
-        raise ValidationError('La hora de finalizacion no puede ser menor a la hora de inicio')
-    else:
-        if fechaInicio < datetime.datetime.now():
-            raise ValidationError('La fecha de inicio no puede ser menor a la fecha actual')
 
 
 class DireccionSerializer(ModelSerializer):
@@ -88,100 +82,139 @@ class SolicitudDonacionListadoSerializer(ModelSerializer):
         ]
 
 
-class SolicitudDonacionCreateSerializer (ModelSerializer):
-    grupos = ListField(required=False)
-    video = FileField(required=False)
-    imagenes = ListField(required=False)
+def create_solicitud_donacion_serializer(usuario):
+    class SolicitudDonacionCreateSerializer(ModelSerializer):
+        grupos = ListField(
+            required=False,
+            write_only=True
+            )
+        imagenes = ListField(
+            child=FileField(),
+            required=False,
+            write_only=True
+            )
+        paciente = JSONField(binary=True, write_only=True)
 
-    class Meta:
-        model = SolicitudDonacion
-        fields = [
-            'titulo',
-            'fechaPublicacion',
-            'donantesNecesarios',
-            'video',
-            'fechaHoraInicio',
-            'fechaHoraFin',
-            'tipo',
-            'centroDonacion',
-            'paciente',
-            'donante',
-            'grupos',
-            'imagenes'
-        ]
+        class Meta:
+            model = SolicitudDonacion
+            fields = [
+                'titulo',
+                'donantesNecesarios',
+                'video',
+                'fechaHoraInicio',
+                'fechaHoraFin',
+                'tipo',
+                'centroDonacion',
+                'paciente',
+                'grupos',
+                'imagenes'
+            ]
 
-    def create(self, validated_data):
+        def validate(self, data):
+            datetime_now = datetime.datetime.now()
+            if data['fechaHoraInicio'] < datetime_now:
+                raise ValidationError('La fecha de inicio no puede ser menor a la fecha actual')
+            else:
+                if data['fechaHoraFin'] < data['fechaHoraInicio']:
+                    raise ValidationError('La hora de finalizacion no puede ser menor a la hora de inicio')
+            return data
 
-        # Obtengo los datos ingresados.
-        titulo = validated_data['titulo']
-        fechaPublicacion = datetime.datetime.now().date()
-        donantesNecesarios = validated_data['donantesNecesarios']
-        video = validated_data.get('video',None)
-        fechaHoraInicio = validated_data.get('fechaHoraInicio')
-        fechaHoraFin = validated_data.get('fechaHoraFin')
-        tipo = validated_data['tipo']
-        centroDonacion = validated_data['centroDonacion']
-        paciente = validated_data['paciente']
-        donante = validated_data['donante']
+        def create(self, validated_data):
 
-        validate_fechaHora(fechaHoraInicio, fechaHoraFin)
+            # Obtengo los datos ingresados.
+            titulo = validated_data['titulo']
+            donantesNecesarios = validated_data['donantesNecesarios']
+            video = validated_data.get('video', None)
+            fechaHoraInicio = validated_data.get('fechaHoraInicio')
+            fechaHoraFin = validated_data.get('fechaHoraFin')
+            tipo = validated_data['tipo']
+            centroDonacion = validated_data['centroDonacion']
+            imagenes = validated_data.get('imagenes', None)
+            paciente_data = validated_data.pop('paciente')
+            direccion_data = paciente_data.pop('direccion')
 
-        # Creo objeto SolicitudDonacion
-        solicitudDonacion = SolicitudDonacion.objects.create(
-            titulo=titulo,
-            fechaPublicacion=fechaPublicacion,
-            donantesNecesarios=donantesNecesarios,
-            video=video,
-            fechaHoraInicio=fechaHoraInicio,
-            fechaHoraFin=fechaHoraFin,
-            tipo=tipo,
-            centroDonacion=centroDonacion,
-            paciente=paciente,
-            donante=donante
-        )
+            localidad_id = direccion_data.pop('localidad')
+            localidad = Localidad.objects.get(id=localidad_id)
+            direccion_obj = Direccion.objects.create(
+                localidad=localidad,
+                **direccion_data
+            )
 
-        solicitudDonacion.save()
+            paciente_obj = Paciente.objects.create(
+                direccion=direccion_obj,
+                **paciente_data
+            )
 
-        # Obtengo los grupos sanguineos necesarios para la donacion
-        grupos = validated_data.pop('grupos')
+            donante = usuario.donante
 
-        # Le asocio cada grupo sanguineo a la solicitud
-        for val in grupos:
-            # Convierto de json a list
-            val = json.loads(val)
-            # for each sobre la lista
-            for valor in val:
-                if (int(valor)):
-                    grupoSanguineo = GrupoSanguineo.objects.get(id=valor)
-                    grupoSanguineoSolicitud = GrupoSanguineoSolicitud.objects.create(
-                        solicitud=solicitudDonacion,
-                        grupoSanguineo=grupoSanguineo
-                    )
-                    grupoSanguineoSolicitud.save()
+            # Creo objeto SolicitudDonacion
+            solicitudDonacion = SolicitudDonacion.objects.create(
+                titulo=titulo,
+                donantesNecesarios=donantesNecesarios,
+                video=video,
+                fechaHoraInicio=fechaHoraInicio,
+                fechaHoraFin=fechaHoraFin,
+                tipo=tipo,
+                centroDonacion=centroDonacion,
+                paciente=paciente_obj,
+                donante=donante
+            )
 
-            imagenes = validated_data.get('imagenes')
-            for value in imagenes:
-                value = json.loads(value)
-                for val in value:
-                    print(val)
-                    imagenSolicitudDonacion = ImagenSolicitudDonacion.objects.create(
-                        imagen=val,
-                        solicitud=solicitudDonacion
-                    )
-                    imagenSolicitudDonacion.save()
+            # Obtengo los grupos sanguineos necesarios para la donacion
+            grupos = validated_data.pop('grupos')
+            print(grupos)
 
-        return solicitudDonacion
+            # Le asocio cada grupo sanguineo a la solicitud
+            for val in grupos:
+                # Convierto de json a list
+                val = json.loads(val)
+                # for each sobre la lista
+                for valor in val:
+                    if (int(valor)):
+                        grupoSanguineo = GrupoSanguineo.objects.get(id=valor)
+                        GrupoSanguineoSolicitud.objects.create(
+                            solicitud=solicitudDonacion,
+                            grupoSanguineo=grupoSanguineo
+                        )
+
+            if imagenes is not None:
+                for index, imagen in enumerate(imagenes):
+                    if index == 0:
+                        ImagenSolicitudDonacion.objects.create(
+                            imagen=imagen,
+                            portada=True,
+                            solicitud=solicitudDonacion
+                        )
+                    else:
+                        ImagenSolicitudDonacion.objects.create(
+                            imagen=imagen,
+                            solicitud=solicitudDonacion
+                        )
+
+            return solicitudDonacion
+    return SolicitudDonacionCreateSerializer
 
 
-class PacienteInfoSerializer(ModelSerializer):
+class PacienteSerializer(ModelSerializer):
+    direccion = DireccionSerializer()
+
     class Meta:
         model = Paciente
-        fields = '__all__'
+        fields = [
+            'id',
+            'nombre',
+            'apellido',
+            'email',
+            'nacimiento',
+            'telefono',
+            'genero',
+            'direccion'
+        ]
 
 
 class SolicitudDonacionInfoSerializer (ModelSerializer):
     centroDonacion = CentroDonacionSerializer()
-    paciente = PacienteInfoSerializer()
+    paciente = PacienteSerializer()
     gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
     imagenesSolicitud = ImagenSolicitudDonacionSerializer(many=True)
 
@@ -208,52 +241,3 @@ class TipoSolicitudSerializer(ModelSerializer):
     class Meta:
         model = TipoSolicitudDonacion
         fields = '__all__'
-
-
-class PacienteCreateSerializer(ModelSerializer):
-    direccion = DireccionSerializer()
-
-    class Meta:
-        model = Paciente
-        fields = [
-            'id',
-            'nombre',
-            'apellido',
-            'email',
-            'nacimiento',
-            'telefono',
-            'genero',
-            'direccion'
-        ]
-
-    def create(self, validated_data):
-
-        # Obtengo los datos ingresados
-        nombre = validated_data.get('nombre')
-        apellido = validated_data.get('apellido')
-        email = validated_data.get('email')
-        nacimiento = validated_data.get('nacimiento')
-        telefono = validated_data.get('telefono')
-        genero = validated_data.get('genero')
-
-        # Creo objeto Paciente
-        paciente = Paciente.objects.create(
-            nombre=nombre,
-            apellido=apellido,
-            email=email,
-            nacimiento=nacimiento,
-            telefono=telefono,
-            genero=genero,
-            )
-
-        # Obtención de los datos de la dirección
-        direccion_data = validated_data.pop('direccion', None)
-
-        if direccion_data is not None:
-            direccion = Direccion.objects.create(**direccion_data)
-
-            paciente.direccion = direccion
-
-        paciente.save()
-
-        return paciente
