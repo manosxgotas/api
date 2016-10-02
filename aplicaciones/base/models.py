@@ -326,6 +326,7 @@ class SolicitudDonacion(models.Model):
     centroDonacion = models.ForeignKey('CentroDonacion', null=True, blank=True, verbose_name='centro de donación')
     paciente = models.ForeignKey('Paciente')
     donante = models.ForeignKey('Donante')
+    historia = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.titulo
