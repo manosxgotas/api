@@ -5,6 +5,7 @@ from rest_framework.serializers import (
     FileField,
     JSONField,
     ListField,
+    SerializerMethodField
     )
 from rest_framework.validators import ValidationError
 from aplicaciones.base.models import (
@@ -107,7 +108,8 @@ def create_solicitud_donacion_serializer(usuario):
                 'centroDonacion',
                 'paciente',
                 'grupos',
-                'imagenes'
+                'imagenes',
+                'historia'
             ]
 
         def validate(self, data):
@@ -129,6 +131,7 @@ def create_solicitud_donacion_serializer(usuario):
             fechaHoraFin = validated_data.get('fechaHoraFin')
             tipo = validated_data['tipo']
             centroDonacion = validated_data['centroDonacion']
+            historia = validated_data.get('historia', None)
             imagenes = validated_data.get('imagenes', None)
             paciente_data = validated_data.pop('paciente')
             direccion_data = paciente_data.pop('direccion')
@@ -156,13 +159,13 @@ def create_solicitud_donacion_serializer(usuario):
                 fechaHoraFin=fechaHoraFin,
                 tipo=tipo,
                 centroDonacion=centroDonacion,
+                historia=historia,
                 paciente=paciente_obj,
                 donante=donante
             )
 
             # Obtengo los grupos sanguineos necesarios para la donacion
             grupos = validated_data.pop('grupos')
-            print(grupos)
 
             # Le asocio cada grupo sanguineo a la solicitud
             for val in grupos:
@@ -197,6 +200,7 @@ def create_solicitud_donacion_serializer(usuario):
 
 class PacienteSerializer(ModelSerializer):
     direccion = DireccionSerializer()
+    edad = SerializerMethodField()
 
     class Meta:
         model = Paciente
@@ -208,8 +212,13 @@ class PacienteSerializer(ModelSerializer):
             'nacimiento',
             'telefono',
             'genero',
-            'direccion'
+            'direccion',
+            'edad'
         ]
+
+    def get_edad(self, obj):
+        today = datetime.date.today()
+        return today.year - obj.nacimiento.year - ((today.month, today.day) < (obj.nacimiento.month, obj.nacimiento.day))
 
 
 class SolicitudDonacionInfoSerializer (ModelSerializer):
@@ -232,7 +241,8 @@ class SolicitudDonacionInfoSerializer (ModelSerializer):
             'paciente',
             'donante',
             'gruposSanguineos',
-            'imagenesSolicitud'
+            'imagenesSolicitud',
+            'historia'
         ]
 
 
