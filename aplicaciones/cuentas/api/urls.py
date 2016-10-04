@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^social/facebook/$', FacebookLogin.as_view(), name='fb_login'),
     url(r'^social/google/$', GoogleLogin.as_view(), name='google_login'),
     url(r'^activar-cuenta-clave/$', activar_cuenta, name='activar-cuenta-clave'),
+    url(r'^activar-cuenta-link/(?P<token>[^/]+)$', activar_cuenta, name='activar-cuenta-link'),
     url(r'^reset-pass-request/$', reset_pass_request, name='reset-pass-request'),
     url(r'^reset-pass/', reset_pass, name='reset-pass'),
     url(r'^reset-pass-token/(?P<token>[^/]+)$', reset_pass, name='reset-pass-token'),
