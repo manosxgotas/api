@@ -31,18 +31,18 @@ class SolicitudDonacionCreateAPI(CreateAPIView):
 
 
 class SolicitudDonacionInfoAPI(RetrieveAPIView):
+    permission_classes = [AllowAny]
     queryset = SolicitudDonacion.objects.all()
     serializer_class = SolicitudDonacionInfoSerializer
     lookup_field = 'id'
 
 
 class TipoSolicitudAPI(ListAPIView):
-    permission_classes = [AllowAny]
     queryset = TipoSolicitudDonacion.objects.all()
     serializer_class = TipoSolicitudSerializer
 
 
 class SolicitudesInfoAPI(ListAPIView):
-    permissions_class = [AllowAny]
+    permission_classes = [AllowAny]
     serializer_class = SolicitudDonacionListadoSerializer
     queryset = SolicitudDonacion.objects.all()
