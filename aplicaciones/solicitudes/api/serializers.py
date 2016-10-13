@@ -63,6 +63,7 @@ class GrupoSanguineoSolicitudSerializer(ModelSerializer):
 class SolicitudDonacionListadoSerializer(ModelSerializer):
     gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
     imagenesSolicitud = ImagenSolicitudDonacionSerializer(many=True)
+    centroDonacion = CentroDonacionSerializer()
 
     class Meta:
         model = SolicitudDonacion
