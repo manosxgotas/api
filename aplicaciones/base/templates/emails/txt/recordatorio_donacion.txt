@@ -1,0 +1,10 @@
+{{ donante.usuario.get_full_name }} queríamos recordarte que ¡ya estás en condiciones para donar de nuevo!
+
+¡Consulta nuestro listado de solicitudes de donación para enterarte quiénes necesitan tu ayuda!
+
+¡Ingresá a Manos por Gotas!
+
+{{ home_url }}
+
+Atentamente,
+Equipo de Manos por gotas.
