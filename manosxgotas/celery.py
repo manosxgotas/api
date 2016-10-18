@@ -23,6 +23,10 @@ app.conf.CELERYBEAT_SCHEDULE = {
         'task': 'eliminar_codigos_vencidos',
         'schedule': timedelta(days=1)
     },
+    'enviar_recordatorio_donante': {
+        'task': 'enviar_recordatorio_donante',
+        'schedule': timedelta(hours=12)
+    },
 }
 
 
