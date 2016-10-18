@@ -80,6 +80,7 @@ def create_update_destroy_donacion_serializer(usuario):
                 'descripcion',
                 'centroDonacion',
                 'evento',
+                'estado',
                 'direccion'
             ]
 
@@ -94,7 +95,7 @@ def create_update_destroy_donacion_serializer(usuario):
             fechaHora = validated_data['fechaHora']
             foto = validated_data.get('foto', None)
             descripcion = validated_data.get('descripcion', '')
-            estado = validated_data.get('estado', None)
+            estado_sentimiento = validated_data.get('estado', None)
             registro = usuario.donante.registro
 
             lugar_donacion = obtener_lugar_donacion(validated_data)
@@ -106,7 +107,7 @@ def create_update_destroy_donacion_serializer(usuario):
                 registro=registro,
                 descripcion=descripcion,
                 lugarDonacion=lugar_donacion,
-                estado=estado
+                estado=estado_sentimiento
                 )
 
             # Seteo estado 'Sin verificar' a la donación.
@@ -159,7 +160,8 @@ class DonacionPerfilSerializer(ModelSerializer):
             'verificacion',
             'lugarDonacion',
             'historicoEstados',
-            'descripcion'
+            'descripcion',
+            'estado'
         ]
 
 
