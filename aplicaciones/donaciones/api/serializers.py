@@ -17,8 +17,7 @@ from aplicaciones.base.models import (
     HistoricoEstadoDonacion,
     Localidad,
     LugarDonacion,
-    RegistroDonacion,
-    VerificacionDonacion
+    RegistroDonacion
     )
 
 from aplicaciones.direcciones.api.serializers import (
@@ -157,7 +156,7 @@ class DonacionPerfilSerializer(ModelSerializer):
             'fechaHora',
             'registro',
             'foto',
-            'verificacion',
+            'imagen_verificacion',
             'lugarDonacion',
             'historicoEstados',
             'descripcion',
@@ -180,20 +179,18 @@ class RegistroDonacionSerializer(ModelSerializer):
 
 class VerificarImagenDonacionSerializer(ModelSerializer):
     class Meta:
-        model = VerificacionDonacion
+        model = Donacion
         fields = [
-            'imagen',
-            'donacion'
+            'imagen_verificacion'
         ]
 
-    def create(self, validated_data):
+    def update(self, instance, validated_data):
         # Obtengo los datos ingresados.
-        imagen = validated_data['imagen']
-        donacion = validated_data['donacion']
+        instance.imagen_verificacion = validated_data.get('imagen_verificacion', instance.imagen_verificacion)
 
         # Obtengo el último histórico de la donación y seteo
         # su fecha fin con la fecha actual.
-        ultimo_historico_donacion = donacion.historicoEstados.last()
+        ultimo_historico_donacion = instance.historicoEstados.last()
         ultimo_historico_donacion.fin = datetime.datetime.now()
         ultimo_historico_donacion.save()
 
@@ -204,18 +201,9 @@ class VerificarImagenDonacionSerializer(ModelSerializer):
         HistoricoEstadoDonacion.objects.create(
             inicio=datetime.datetime.now(),
             estado=estado,
-            donacion=donacion
+            donacion=instance
             )
 
-        # Creo nueva instancia de VerificacionDonacion, la asocio
-        # a la donación y guardo la imagen.
-        verificacion = VerificacionDonacion()
-        verificacion.save()
+        instance.save()
 
-        donacion.verificacion = verificacion
-        donacion.save()
-
-        verificacion.imagen = imagen
-        verificacion.save()
-
-        return verificacion
+        return instance

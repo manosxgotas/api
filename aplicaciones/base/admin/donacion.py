@@ -18,7 +18,6 @@ ESTADO_PENDIENTE = 'pendiente'
 ESTADO_VERIFICADA = 'verificada'
 
 
-
 def get_estado_donacion(donacion):
     estado_donacion = None
     historicos = donacion.historicoEstados
@@ -100,7 +99,7 @@ class DonacionAdmin(admin.ModelAdmin):
         'estado_donacion',
         'foto',
         'fechaHora',
-        'foto_verificacion',
+        'imagen_verificacion',
         'boton_verificacion'
     )
 
@@ -110,16 +109,6 @@ class DonacionAdmin(admin.ModelAdmin):
 
     def estado_donacion(self, obj):
         return get_estado_donacion(obj)
-
-    def foto_verificacion(self, obj):
-        estado_donacion = get_estado_donacion(obj)
-        if estado_donacion is not None:
-            if estado_donacion.lower() == ESTADO_PENDIENTE or estado_donacion.lower() == ESTADO_VERIFICADA and obj.verificacion:
-                return '<a href="{0!s}" >{1!s}</a>'.format(obj.verificacion.imagen.url, obj.verificacion.imagen)
-            else:
-                return "--------"
-    foto_verificacion.short_description = 'Foto de verificación'
-    foto_verificacion.allow_tags = True
 
     def boton_verificacion(self, obj):
         estado_donacion = get_estado_donacion(obj)
@@ -134,7 +123,6 @@ class DonacionAdmin(admin.ModelAdmin):
             return "--------"
     boton_verificacion.short_description = 'Verificar donación'
     boton_verificacion.allow_tags = True
-
 
     def _usuario(self, obj):
         return obj.registro.donante
