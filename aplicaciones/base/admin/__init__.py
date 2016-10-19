@@ -16,4 +16,3 @@ from .solicitudDonacion import *
 from .tipoCentroDonacion import *
 from .tipoDocumento import *
 from .tipoSolicitudDonacion import *
-from .verificacionDonacion import *

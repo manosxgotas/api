@@ -67,13 +67,6 @@ def establecer_destino_imagen_ubicacion(instance, imagename):
     if (isinstance(instance, Donacion)):
         owner = str(instance.registro.donante)
         ruta_imagenes_ubicacion = 'donaciones/' + owner + '/'
-    # Almacena la imágen en:
-    # 'media/donaciones/<nombre usuario>/verificaciones/<str donacion>/<str verificacion>.<extension>'
-    # si es una verificación.
-    if (isinstance(instance, VerificacionDonacion)):
-        owner = str(instance.donacion.registro.donante)
-        donacion = str(instance.donacion)
-        ruta_imagenes_ubicacion = 'donaciones/' + owner + '/verificaciones/' + donacion + '/'
     # Almacena la imágen en: 'media/solicitudes/imagenes/<nombre usuario>/<titulo solicitud>'
     # si es un evento.
     if (isinstance(instance, ImagenSolicitudDonacion)):
@@ -242,7 +235,7 @@ class Provincia(models.Model):
 
 class GrupoSanguineo(models.Model):
     nombre = models.CharField(max_length=5)
-    puedeDonarA = models.ManyToManyField('self', blank=True, verbose_name='puede donar a')
+    puedeDonarA = models.ManyToManyField('self', blank=True, verbose_name='puede donar a', symmetrical=False)
 
     def __str__(self):
         return self.nombre
@@ -270,7 +263,7 @@ class Donacion(models.Model):
     estado = SentimientosField(blank=True, null=True)
     descripcion = models.TextField(blank=True, verbose_name='descripción')
     registro = models.ForeignKey('RegistroDonacion', related_name='donaciones', verbose_name='registro de donación')
-    verificacion = models.OneToOneField('VerificacionDonacion', blank=True, null=True, verbose_name='verificación', related_name='donacion')
+    imagen_verificacion = models.ImageField(blank=True, null=True, verbose_name='imagen de verificación', upload_to=establecer_destino_imagen_ubicacion)
     lugarDonacion = models.ForeignKey('LugarDonacion', verbose_name='lugar de donación')
 
     def __str__(self):
@@ -305,14 +298,6 @@ class HistoricoEstadoDonacion(models.Model):
     class Meta:
         verbose_name = 'histórico de estados de donación'
         verbose_name_plural = 'históricos de estados de donación'
-
-
-class VerificacionDonacion(models.Model):
-    imagen = models.ImageField(upload_to=establecer_destino_imagen_ubicacion)
-
-    class Meta:
-        verbose_name = 'verificación de donación'
-        verbose_name_plural = 'verificaciones de donación'
 
 
 class SolicitudDonacion(models.Model):
