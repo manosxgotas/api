@@ -2,6 +2,7 @@
 
 from django.contrib import admin
 
+from .registroDonacion import RegistroDonacionInline
 from ..models import Donante
 
 class DonanteAdmin(admin.ModelAdmin):
@@ -15,6 +16,11 @@ class DonanteAdmin(admin.ModelAdmin):
         '_tipoDocumento',
         '_dni'
     )
+
+    inlines = [
+        RegistroDonacionInline,
+    ]
+
 
     def _nombre (self, obj):
         return obj.usuario.get_full_name()

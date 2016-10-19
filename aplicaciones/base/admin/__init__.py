@@ -8,14 +8,11 @@ from .estadoDonacion import *
 from .estadoSolicitudDonacion import *
 from .evento import *
 from .grupoSanguineo import *
-from .grupoSanguineoSolicitud import *
-from .historicoEstadoDonacion import *
 from .localidad import *
 from .lugarDonacion import *
 from .nacionalidad import *
 from .paciente import *
 from .provincia import *
-from .registroDonacion import *
 from .solicitudDonacion import *
 from .tipoCentroDonacion import *
 from .tipoDocumento import *
