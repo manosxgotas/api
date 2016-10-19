@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from django.contrib import admin
+from .grupoSanguineoSolicitud import GrupoSanguineoSolicitudInline
 
 from ..models import (
     SolicitudDonacion,
@@ -33,7 +34,8 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
     )
 
     inlines = [
-            ImagenSolicitudDonacionInline
+            ImagenSolicitudDonacionInline,
+            GrupoSanguineoSolicitudInline
         ]
 
 admin.site.register(SolicitudDonacion, SolicitudDonacionAdmin)
