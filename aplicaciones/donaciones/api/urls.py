@@ -49,7 +49,7 @@ urlpatterns = [
         ),
 
     url(
-        r'^verificar-imagen/(?P<donacion_id>\w+)$',
+        r'^verificar-imagen/(?P<id>\w+)$',
         VerificarImagenDonacionAPI.as_view(),
         name='verificar-imagen-donacion'
         )

@@ -24,7 +24,6 @@ from aplicaciones.base.models import (
     Donacion,
     EstadoDonacion,
     HistoricoEstadoDonacion,
-    VerificacionDonacion,
     DIAS_DONACION_POR_GENERO
     )
 
@@ -79,11 +78,11 @@ class DonacionInfoAPI(RetrieveAPIView):
     lookup_field = 'id'
 
 
-class VerificarImagenDonacionAPI(CreateAPIView):
-    queryset = VerificacionDonacion.objects.all()
+class VerificarImagenDonacionAPI(UpdateAPIView):
+    queryset = Donacion.objects.all()
     parser_classes = [FormParser, MultiPartParser]
     serializer_class = VerificarImagenDonacionSerializer
-    lookup_field = 'donacion_id'
+    lookup_field = 'id'
 
 
 @api_view(['GET'])
