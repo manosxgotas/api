@@ -4,7 +4,8 @@ from .views import (
     SolicitudDonacionCreateAPI,
     SolicitudDonacionInfoAPI,
     TipoSolicitudAPI,
-    SolicitudesInfoAPI
+    SolicitudesInfoAPI,
+    SolicitudesDonanteInfoAPI
     )
 
 urlpatterns = [
@@ -30,6 +31,11 @@ urlpatterns = [
     url(
         r'^listado-solicitudes/$',
         SolicitudesInfoAPI.as_view(),
+        name='listado-solicitudes'
+    ),
+    url(
+        r'^listado-solicitudes-donante/(?P<donante>\w+)$',
+        SolicitudesDonanteInfoAPI.as_view(),
         name='listado-solicitudes'
     ),
 ]

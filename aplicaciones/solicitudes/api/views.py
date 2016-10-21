@@ -16,6 +16,7 @@ from .serializers import (
     SolicitudDonacionInfoSerializer,
     TipoSolicitudSerializer,
     SolicitudDonacionListadoSerializer,
+    SolicitudesDonanteInfoSerializer,
 )
 
 
@@ -46,3 +47,8 @@ class SolicitudesInfoAPI(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SolicitudDonacionListadoSerializer
     queryset = SolicitudDonacion.objects.all()
+ 
+class SolicitudesDonanteInfoAPI(RetrieveAPIView):
+    queryset = SolicitudDonacion.objects.all()
+    serializer_class = SolicitudesDonanteInfoSerializer
+    lookup_field = 'donante'
