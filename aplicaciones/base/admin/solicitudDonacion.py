@@ -99,17 +99,15 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
 
                     return (donantes[cantidad],)
 
-                print(categoria)
-
                 if categoria == "1":
                     solicitudes = PivotDataPool(
                             series=[
                                 {'options': {
-                                'source': queryset,
-                                'categories':'mes',
-                                'legend_by':'centroDonacion__nombre'},
-                                'terms': {
-                                    'cantidad': Count('id')
+                                    'source': queryset,
+                                    'categories': 'mes',
+                                    'legend_by': 'centroDonacion__nombre'},
+                                    'terms': {
+                                        'cantidad': Count('id')
                                     }}],
                             sortf_mapf_mts=(None, meses_anio, True))
                 else:
@@ -127,16 +125,16 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
                 # Step 2: Create the Chart object
                 pivcht = PivotChart(
                     datasource=solicitudes,
-                    series_options=
-                    [{'options': {
-                        'type': 'column',
-                        'stacking': True},
-                        'terms': [
-                            'cantidad'
+                    series_options=[
+                        {'options': {
+                            'type': 'column',
+                            'stacking': True},
+                            'terms': [
+                                'cantidad'
                         ]}],
-                    chart_options=
-                    {'title': {
-                        'text': titulo},
+                    chart_options={
+                        'title': {
+                            'text': titulo},
                         })
 
                 # Step 3: Send the chart object to the template.
@@ -149,9 +147,10 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
 
         context['adminform'] = admin.helpers.AdminForm(form, list([(None, {'fields': form.base_fields})]),
                                                        self.get_prepopulated_fields(request))
+
         return render(request, 'admin/base/solicituddonacion/estadisticas.html', context)
 
-    empty_value_display = 'Valor no ingresado'
+    empty_value_display = '--------'
     list_display = (
         'id',
         'titulo',

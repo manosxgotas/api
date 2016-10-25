@@ -21,7 +21,7 @@ class CentroDonacionAdmin(admin.ModelAdmin):
     empty_value_display = 'Valor no ingresado'
     list_display = (
         'nombre',
-        '_tipoCentro',
+        'tipo',
     )
 
     list_filter = (
@@ -31,8 +31,5 @@ class CentroDonacionAdmin(admin.ModelAdmin):
     inlines = [
         HorarioCentroDonacionInline,
     ]
-
-    def _tipoCentro(self, obj):
-        return obj.tipo.nombre
 
 admin.site.register(CentroDonacion, CentroDonacionAdmin)

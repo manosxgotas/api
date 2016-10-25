@@ -62,7 +62,7 @@ class CodigoVerificacionAdmin(admin.ModelAdmin):
         context['form'] = form
 
         context['adminform'] = admin.helpers.AdminForm(form, list([(None, {'fields': form.base_fields})]),
-                                                 self.get_prepopulated_fields(request))
+                                                       self.get_prepopulated_fields(request))
 
         return render(request, 'admin/base/codigoverificacion/generar.html', context)
 

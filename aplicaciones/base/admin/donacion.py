@@ -129,7 +129,6 @@ class DonacionAdmin(admin.ModelAdmin):
 
                 queryset = donacion_qs\
                     .exclude(registro__donante__grupoSanguineo__isnull=True)\
-                    .order_by('fechaHora')\
                     .extra(select={'mes': 'CAST(EXTRACT(month from "base_donacion"."fechaHora") AS INT)'})
 
                 # Step 1: Create a DataPool with the data we want to retrieve.
@@ -156,13 +155,13 @@ class DonacionAdmin(admin.ModelAdmin):
                         PivotDataPool(
                             series=[
                                 {'options': {
-                                'source': queryset,
-                                'categories': 'mes',
-                                'legend_by': 'registro__donante__grupoSanguineo__nombre'},
-                                'terms': {
+                                    'source': queryset,
+                                    'categories': 'mes',
+                                    'legend_by': 'registro__donante__grupoSanguineo__nombre'},
+                                    'terms': {
                                     'cantidad': Count('id')
                                     }}],
-                                sortf_mapf_mts=(None, meses_anio, True))
+                            sortf_mapf_mts=(None, meses_anio, True))
                 elif categoria == "gs":
                     donaciones = \
                         PivotDataPool(
@@ -187,18 +186,18 @@ class DonacionAdmin(admin.ModelAdmin):
                 # Step 2: Create the Chart object
                 pivcht = PivotChart(
                     datasource=donaciones,
-                    series_options=
-                    [{'options': {
-                        'type': 'column',
-                        'stacking': True},
-                        'terms': [
+                    series_options=[
+                        {'options': {
+                            'type': 'column',
+                            'stacking': True},
+                            'terms': [
                             'cantidad'
                         ]}],
-                    chart_options=
-                    {'title': {
-                        'text': titulo},
-                     'xAxis': {
-                        'text': 'Valores'},
+                    chart_options={
+                        'title': {
+                            'text': titulo},
+                        'xAxis': {
+                            'text': 'Valores'},
                     })
 
                 # Step 3: Send the chart object to the template.
@@ -211,6 +210,7 @@ class DonacionAdmin(admin.ModelAdmin):
 
         context['adminform'] = admin.helpers.AdminForm(form, list([(None, {'fields': form.base_fields})]),
                                                        self.get_prepopulated_fields(request))
+
         return render(request, 'admin/base/donacion/estadisticas.html', context)
 
     empty_value_display = '--------'
@@ -242,6 +242,7 @@ class DonacionAdmin(admin.ModelAdmin):
             )
         else:
             return "--------"
+
     boton_verificacion.short_description = 'Verificar donación'
     boton_verificacion.allow_tags = True
 

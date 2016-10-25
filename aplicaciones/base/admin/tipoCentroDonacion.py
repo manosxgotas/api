@@ -9,7 +9,7 @@ class TipoCentroDonacionAdmin(admin.ModelAdmin):
     """
     Especificación de la representación del tipo del centro de donación en la interfaz de administración.
     """
-    empty_value_display = 'Valor no ingresado'
+    empty_value_display = '--------'
     list_display = (
         'nombre',
         'descripcion'
