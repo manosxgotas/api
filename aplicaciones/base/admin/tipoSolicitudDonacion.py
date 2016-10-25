@@ -9,7 +9,7 @@ class TipoSolicitudDonacionAdmin(admin.ModelAdmin):
     """
     Especificación de la representación del tipo de solicitud de donacion en la interfaz de administración.
     """
-    empty_value_display = 'Valor no ingresado'
+    empty_value_display = '--------'
     list_display = (
         'nombre',
         'descripcion'

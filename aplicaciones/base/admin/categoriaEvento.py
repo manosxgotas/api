@@ -9,7 +9,7 @@ class CategoriaEventoAdmin(admin.ModelAdmin):
     """
     Especificación de la representación de la categoria de eventos en la interfaz de administración.
     """
-    empty_value_display = 'Valor no ingresado'
+    empty_value_display = '--------'
     list_display = (
         'nombre',
         'descripcion'

@@ -2,7 +2,6 @@ amqp==1.4.9
 anyjson==0.3.3
 billiard==3.3.0.23
 celery==3.1.23
-click==6.6
 defusedxml==0.4.1
 dj-database-url==0.4.1
 dj-static==0.0.6
@@ -18,16 +17,9 @@ django-sslserver==0.19
 django-toolbelt==0.0.1
 djangorestframework==3.3.3
 djangorestframework-jwt==1.8.0
-Flask==0.11.1
-gevent==1.1.1
-greenlet==0.4.10
 gunicorn==19.6.0
 itsdangerous==0.24
-Jinja2==2.8
 kombu==3.0.35
-locustio==0.7.5
-MarkupSafe==0.23
-msgpack-python==0.4.8
 oauthlib==2.0.0
 Pillow==3.2.0
 psycopg2==2.6.1
@@ -38,4 +30,3 @@ requests==2.11.1
 requests-oauthlib==0.6.2
 six==1.10.0
 static3==0.7.0
-Werkzeug==0.11.11
