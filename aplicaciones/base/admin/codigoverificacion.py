@@ -29,6 +29,8 @@ class CodigoVerificacionAdmin(admin.ModelAdmin):
     # Método para generar códigos de verificación.
     def generar(self, request):
         context = {
+            'site_title': 'Administración de Manos por gotas',
+            'site_header': 'Administración de Manos por gotas',
             'title': 'Generar códigos de verificación',
             'app_label': self.model._meta.app_label,
             'opts': self.model._meta,

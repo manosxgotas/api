@@ -289,7 +289,7 @@ class EstadoDonacion(models.Model):
 class HistoricoEstadoDonacion(models.Model):
     inicio = models.DateTimeField()
     fin = models.DateTimeField(null=True, blank=True)
-    donacion = models.ForeignKey('Donacion', related_name='historicoEstados')
+    donacion = models.ForeignKey('Donacion', related_name='historicoEstados', verbose_name='Historico de Estados')
     estado = models.ForeignKey('EstadoDonacion')
 
     def __str__(self):
