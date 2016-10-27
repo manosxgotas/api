@@ -23,14 +23,30 @@ GRUPOS_SANGUINEOS_CHOICES = (
 )
 
 CATEGORIA_SOLICITUDES_CHOICES = (
-    (1, 'Por meses'),
-    (2, 'Por cantidad de donantes')
+    ('meses', 'Por meses'),
+    ('donantes', 'Por cantidad de donantes'),
+    ('tipo', 'Por tipo de solicitud')
+
+)
+
+ETIQUETA_SOLICITUDES_CHOICES = (
+    ('', 'Sin etiqueta'),
+    ('tipo', 'Por tipo de solicitud')
 )
 
 CATEGORIA_DONACIONES_CHOICES = (
     ('mes', 'Por meses'),
     ('gs', 'Por grupo sanguíneo'),
-    ('provincia', 'Por provincia')
+    ('provincia', 'Por provincia'),
+    ('edad', 'Por edades'),
+    ('sexo', 'Por sexo'),
+    ('estado', 'Por estado de la donación'),
+)
+
+ETIQUETA_DONACIONES_CHOICES = (
+    ('', 'Sin etiqueta'),
+    ('gs', 'Por grupo sanguíneo'),
+    ('estado', 'Por estado de la donación')
 )
 
 
@@ -55,6 +71,13 @@ class FormularioEstadisticasDonacion(forms.Form):
         widget=forms.Select(attrs={'id': 'categoria_select', 'class': 'form-control'})
     )
 
+    etiqueta = forms.ChoiceField(
+        choices=ETIQUETA_DONACIONES_CHOICES,
+        label="Etiqueta de filtrado",
+        required=False,
+        widget=forms.Select(attrs={'id': 'etiqueta_select', 'class': 'form-control'})
+    )
+
 
 class FormularioEstadisticasSolicitudDonacion(forms.Form):
     anio = forms.ChoiceField(
@@ -74,4 +97,11 @@ class FormularioEstadisticasSolicitudDonacion(forms.Form):
         choices=CATEGORIA_SOLICITUDES_CHOICES,
         label="Categoría de filtrado",
         widget=forms.Select(attrs={'id': 'categoria_select', 'class': 'form-control'})
+    )
+
+    etiqueta = forms.ChoiceField(
+        choices=ETIQUETA_SOLICITUDES_CHOICES,
+        label="Etiqueta de filtrado",
+        required=False,
+        widget=forms.Select(attrs={'id': 'etiqueta_select', 'class': 'form-control'})
     )

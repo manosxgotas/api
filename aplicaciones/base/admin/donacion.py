@@ -14,7 +14,9 @@ from .forms import FormularioEstadisticasDonacion
 from ..models import (
     Donacion,
     EstadoDonacion,
-    HistoricoEstadoDonacion
+    HistoricoEstadoDonacion,
+    GENEROS,
+    MESES
 )
 
 ESTADO_PENDIENTE = 'pendiente'
@@ -123,65 +125,141 @@ class DonacionAdmin(admin.ModelAdmin):
             if form.is_valid():
                 anio = form.cleaned_data['anio']
                 categoria = form.cleaned_data['categoria']
+                etiqueta = form.cleaned_data['etiqueta']
                 titulo = "Donaciones por grupo sanguíneo del año {0!s}".format(anio)
 
-                donacion_qs = Donacion.objects.filter(fechaHora__year=anio)
-
-                queryset = donacion_qs\
-                    .exclude(registro__donante__grupoSanguineo__isnull=True)\
-                    .extra(select={'mes': 'CAST(EXTRACT(month from "base_donacion"."fechaHora") AS INT)'})
+                donacion_qs = Donacion.objects\
+                    .filter(fechaHora__year=anio)
 
                 # Step 1: Create a DataPool with the data we want to retrieve.
-                def meses_anio(x):
-                    meses = {
-                        "1": 'Enero',
-                        "2": 'Febrero',
-                        "3": 'Marzo',
-                        "4": 'Abril',
-                        "5": 'Mayo',
-                        "6": 'Junio',
-                        "7": 'Julio',
-                        "8": 'Agosto',
-                        "9": 'Septiembre',
-                        "10": 'Octubre',
-                        "11": 'Noviembre',
-                        "12": 'Diciembre'
+
+                def grupos_etarios(x):
+                    edad = int(x[0])
+                    grupos = {
+                        "<18": 'Menores de 18 años',
+                        ">18": 'Entre 18 y 25 años',
+                        ">25": 'Entre 25 y 30 años',
+                        ">30": 'Entre 30 y 40 años',
+                        ">40": 'Entre 40 y 50 años',
+                        ">50": 'Entre 50 y 60 años',
+                        ">60": 'Mayor de 60 años',
                     }
 
-                    return (meses[x[0]],)
+                    if edad >= 18 and edad < 25:
+                        categoria = ">18"
+                    elif edad >= 25 and edad < 30:
+                        categoria = ">25"
+                    elif edad >= 30 and edad < 40:
+                        categoria = ">30"
+                    elif edad >= 40 and edad < 50:
+                        categoria = ">40"
+                    elif edad >= 50 and edad < 60:
+                        categoria = ">50"
+                    elif edad >= 60:
+                        categoria = ">60"
+                    else:
+                        categoria = "<18"
+
+                    return (grupos[categoria],)
+
+                def meses_anio(x):
+                    mes = int(x[0])
+                    return (MESES[mes],)
+
+                def nombres_generos(x):
+                    return (GENEROS[x[0]],)
+
+                legend_by = None
+                sortf_mapf_mts = None
 
                 if categoria == "mes":
-                    donaciones = \
-                        PivotDataPool(
-                            series=[
-                                {'options': {
-                                    'source': queryset,
-                                    'categories': 'mes',
-                                    'legend_by': 'registro__donante__grupoSanguineo__nombre'},
-                                    'terms': {
-                                    'cantidad': Count('id')
-                                    }}],
-                            sortf_mapf_mts=(None, meses_anio, True))
+                    categories = 'mes'
+                    sortf_mapf_mts = (None, meses_anio, True)
+                    queryset = donacion_qs\
+                        .extra(select={'mes': 'CAST(EXTRACT(month from "base_donacion"."fechaHora") AS INT)'})
+
                 elif categoria == "gs":
-                    donaciones = \
-                        PivotDataPool(
-                            series=[
-                                {'options': {
-                                    'source': queryset,
-                                    'categories': 'registro__donante__grupoSanguineo__nombre'},
-                                    'terms': {
-                                        'cantidad': Count('id')
-                                    }}],)
-                else:
-                    donaciones = \
-                        PivotDataPool(
-                            series=[
-                                {'options': {
-                                    'source': queryset,
-                                    'categories': 'lugarDonacion__direccion__localidad__provincia__nombre'},
-                                    'terms': {
-                                        'cantidad': Count('id')
-                                    }}], )
+                    categories = 'registro__donante__grupoSanguineo__nombre'
+                    queryset = donacion_qs\
+                        .exclude(registro__donante__grupoSanguineo__isnull=True)
+
+                elif categoria == "edad":
+                    categories = 'edad'
+                    sortf_mapf_mts = (None, grupos_etarios, False)
+                    queryset = donacion_qs\
+                        .exclude(registro__donante__nacimiento__isnull=True)\
+                        .extra(select={
+                            'edad':
+                            """
+                                select CAST(EXTRACT(YEAR from AGE(CURRENT_DATE, nacimiento)) AS INT)
+                                from base_donante where base_donacion.registro_id = base_registrodonacion.id
+                                and base_registrodonacion.donante_id = base_donante.id
+                            """
+                        })
+
+                elif categoria == "estado":
+                    categories = 'estado_donacion'
+                    queryset = donacion_qs\
+                        .exclude(historicoEstados__isnull=True)\
+                        .extra(select={
+                            'estado_donacion':
+                                """
+                                    select resultado.nombre from
+                                    (select distinct tablas_historicos.donacion_id,
+                                    est.nombre, max_date FROM base_estadodonacion est,
+                                    base_historicoestadodonacion as tablas_historicos
+                                    inner join (select donacion_id, MAX(inicio) as max_date
+                                    from public.base_historicoestadodonacion group by donacion_id)a
+                                    on a.donacion_id = tablas_historicos.donacion_id and a.max_date = inicio
+                                    where est.id = tablas_historicos.estado_id and tablas_historicos.donacion_id = base_donacion.id) resultado
+                                """
+                        })
+
+                elif categoria == "provincia":
+                    categories = 'lugarDonacion__direccion__localidad__provincia__nombre'
+                    queryset = donacion_qs
+
+                elif categoria == "sexo":
+                    categories = 'registro__donante__genero'
+                    sortf_mapf_mts = (None, nombres_generos, False)
+                    queryset = donacion_qs
+
+                if etiqueta == "gs":
+                    legend_by = 'registro__donante__grupoSanguineo__nombre'
+                    if categoria != "gs":
+                        queryset = queryset\
+                            .exclude(registro__donante__grupoSanguineo__isnull=True)
+
+                elif etiqueta == "estado":
+                    legend_by = 'estado_donacion'
+                    if categoria != "estado":
+                        queryset = queryset\
+                            .exclude(historicoEstados__isnull=True)\
+                            .extra(select={
+                                'estado_donacion':
+                                    """
+                                        select resultado.nombre from
+                                        (select distinct tablas_historicos.donacion_id,
+                                        est.nombre, max_date FROM base_estadodonacion est,
+                                        base_historicoestadodonacion as tablas_historicos
+                                        inner join (select donacion_id, MAX(inicio) as max_date
+                                        from public.base_historicoestadodonacion group by donacion_id)a
+                                        on a.donacion_id = tablas_historicos.donacion_id and a.max_date = inicio
+                                        where est.id = tablas_historicos.estado_id and tablas_historicos.donacion_id = base_donacion.id) resultado
+                                    """
+                            })
+
+                donaciones = \
+                    PivotDataPool(
+                        series=[
+                            {'options': {
+                                'source': queryset,
+                                'categories': categories,
+                                'legend_by': legend_by},
+                                'terms': {
+                                    'cantidad': Count('id')
+                                }}],
+                        sortf_mapf_mts=sortf_mapf_mts)
 
                 # Step 2: Create the Chart object
                 pivcht = PivotChart(
