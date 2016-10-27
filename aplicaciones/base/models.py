@@ -51,6 +51,21 @@ SENTIMIENTOS = {
     '6': _(u'Excelente'),
 }
 
+MESES = {
+    1: _(u'Enero'),
+    2: _(u'Febrero'),
+    3: _(u'Marzo'),
+    4: _(u'Abril'),
+    5: _(u'Mayo'),
+    6: _(u'Junio'),
+    7: _(u'Julio'),
+    8: _(u'Agosto'),
+    9: _(u'Septiembre'),
+    10: _(u'Octubre'),
+    11: _(u'Noviembre'),
+    12: _(u'Diciembre')
+}
+
 
 def validate_fecha_hora_futuro(value):
     if value > datetime.datetime.now():
