@@ -253,7 +253,15 @@ class TipoSolicitudSerializer(ModelSerializer):
         model = TipoSolicitudDonacion
         fields = '__all__'
 
+
 class SolicitudesDonanteInfoSerializer(ModelSerializer):
+
+    class Meta:
+        model = SolicitudDonacion
+        fields = '__all__'
+        depth = 1
+
+class EliminarSolicitudSerializer(ModelSerializer):
 
     class Meta:
         model = SolicitudDonacion
