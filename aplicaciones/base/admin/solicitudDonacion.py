@@ -10,7 +10,8 @@ from .forms import FormularioEstadisticasSolicitudDonacion
 
 from ..models import (
     SolicitudDonacion,
-    ImagenSolicitudDonacion
+    ImagenSolicitudDonacion,
+    MESES
     )
 
 
@@ -51,6 +52,7 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
                 anio = form.cleaned_data['anio']
                 gs = form.cleaned_data['gs']
                 categoria = form.cleaned_data['categoria']
+                etiqueta = form.cleaned_data['etiqueta']
                 titulo = "Solicitudes de donación por grupo sanguíneo del año {0!s}".format(anio)
 
                 solicitud_donacion_qs = SolicitudDonacion.objects.filter(fechaPublicacion__year=anio)
@@ -66,61 +68,56 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
 
                 # Step 1: Create a DataPool with the data we want to retrieve.
                 def meses_anio(x):
-                    meses = {
-                        "1": 'Enero',
-                        "2": 'Febrero',
-                        "3": 'Marzo',
-                        "4": 'Abril',
-                        "5": 'Mayo',
-                        "6": 'Junio',
-                        "7": 'Julio',
-                        "8": 'Agosto',
-                        "9": 'Septiembre',
-                        "10": 'Octubre',
-                        "11": 'Noviembre',
-                        "12": 'Diciembre'
-                    }
-
-                    return (meses[x[0]],)
+                    mes = int(x[0])
+                    return (MESES[mes],)
 
                 def cantidad_donantes(x):
+                    cantidad_donantes = int(x[0])
                     donantes = {
                         "<5": 'Menos de 5',
                         "<10": 'Entre 5 y 10',
                         ">10": 'Más de 10',
                     }
 
-                    if int(x[0]) < 5:
+                    if cantidad_donantes < 5:
                         cantidad = "<5"
-                    elif int(x[0]) < 10:
+                    elif cantidad_donantes >= 5 and cantidad_donantes < 10:
                         cantidad = "<10"
                     else:
                         cantidad = ">10"
 
                     return (donantes[cantidad],)
 
-                if categoria == "1":
-                    solicitudes = PivotDataPool(
-                            series=[
-                                {'options': {
-                                    'source': queryset,
-                                    'categories': 'mes',
-                                    'legend_by': 'centroDonacion__nombre'},
-                                    'terms': {
-                                        'cantidad': Count('id')
-                                    }}],
-                            sortf_mapf_mts=(None, meses_anio, True))
-                else:
-                    solicitudes = PivotDataPool(
-                        series=[
-                            {'options': {
-                                'source': queryset,
-                                'categories': 'donantesNecesarios',
-                                'legend_by': 'centroDonacion__nombre'},
-                                'terms': {
-                                    'cantidad': Count('id')
-                                }}],
-                        sortf_mapf_mts=(None, cantidad_donantes, True))
+                sortf_mapf_mts = None
+                legend_by = None
+
+                if categoria == "meses":
+                    categories = 'mes'
+                    sortf_mapf_mts = (None, meses_anio, False)
+
+                elif categoria == "donantes":
+                    categories = 'donantesNecesarios'
+                    sortf_mapf_mts = (None, cantidad_donantes, False)
+
+                elif categoria == "tipo":
+                    categories = 'tipo__nombre'
+
+                if etiqueta == "centro":
+                    legend_by = 'centroDonacion__nombre'
+
+                elif etiqueta == "tipo":
+                    legend_by = 'tipo__nombre'
+
+                solicitudes = PivotDataPool(
+                    series=[
+                        {'options': {
+                            'source': queryset,
+                            'categories': categories,
+                            'legend_by': legend_by},
+                            'terms': {
+                                'cantidad': Count('id')
+                            }}],
+                    sortf_mapf_mts=sortf_mapf_mts)
 
                 # Step 2: Create the Chart object
                 pivcht = PivotChart(
