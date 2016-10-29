@@ -3,7 +3,8 @@ from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
-    ListAPIView
+    ListAPIView,
+    RetrieveDestroyAPIView
     )
 
 from aplicaciones.base.models import (
@@ -16,8 +17,9 @@ from .serializers import (
     SolicitudDonacionInfoSerializer,
     TipoSolicitudSerializer,
     SolicitudDonacionListadoSerializer,
+    SolicitudesDonanteInfoSerializer,
+    EliminarSolicitudSerializer,
 )
-
 
 class SolicitudDonacionCreateAPI(CreateAPIView):
     queryset = SolicitudDonacion.objects.all()
@@ -46,3 +48,17 @@ class SolicitudesInfoAPI(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SolicitudDonacionListadoSerializer
     queryset = SolicitudDonacion.objects.all()
+ 
+class SolicitudesDonanteInfoAPI(ListAPIView):
+    queryset = SolicitudDonacion.objects.all()
+    serializer_class = SolicitudesDonanteInfoSerializer
+    
+    def get_queryset(self):
+        donanteID = self.kwargs['donante']
+        return SolicitudDonacion.objects.filter(donante=donanteID)
+
+
+class EliminarSolicitudInfoAPI(RetrieveDestroyAPIView):
+    queryset = SolicitudDonacion.objects.all()
+    serializer_class = EliminarSolicitudSerializer
+    lookup_field = 'id'

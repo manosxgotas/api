@@ -69,3 +69,4 @@ class GrupoSanguineoInfoAPI(RetrieveAPIView):
     queryset = GrupoSanguineo.objects.all()
     serializer_class = GrupoSanguineoInfoSerializer
     lookup_field = 'id'
+
