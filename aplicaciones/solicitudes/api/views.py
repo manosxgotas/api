@@ -4,7 +4,7 @@ from rest_framework.generics import (
     CreateAPIView,
     RetrieveAPIView,
     ListAPIView,
-    RetrieveDestroyAPIView
+    DestroyAPIView
     )
 
 from aplicaciones.base.models import (
@@ -16,10 +16,11 @@ from .serializers import (
     create_solicitud_donacion_serializer,
     SolicitudDonacionInfoSerializer,
     TipoSolicitudSerializer,
-    SolicitudDonacionListadoSerializer,
-    SolicitudesDonanteInfoSerializer,
-    EliminarSolicitudSerializer,
+    SolicitudDonacionListadoSerializer
 )
+
+from aplicaciones.base.api.permissions import IsOwnerSolicitud
+
 
 class SolicitudDonacionCreateAPI(CreateAPIView):
     queryset = SolicitudDonacion.objects.all()
@@ -48,17 +49,19 @@ class SolicitudesInfoAPI(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SolicitudDonacionListadoSerializer
     queryset = SolicitudDonacion.objects.all()
- 
-class SolicitudesDonanteInfoAPI(ListAPIView):
+
+
+class SolicitudesDonanteListAPI(ListAPIView):
     queryset = SolicitudDonacion.objects.all()
-    serializer_class = SolicitudesDonanteInfoSerializer
-    
+    serializer_class = SolicitudDonacionListadoSerializer
+
     def get_queryset(self):
-        donanteID = self.kwargs['donante']
-        return SolicitudDonacion.objects.filter(donante=donanteID)
+        donante = self.request.user.donante
+        return SolicitudDonacion.objects.filter(donante=donante)
 
 
-class EliminarSolicitudInfoAPI(RetrieveDestroyAPIView):
+class SolicitudDonacionDeleteAPI(DestroyAPIView):
+    permission_classes = [IsOwnerSolicitud]
     queryset = SolicitudDonacion.objects.all()
-    serializer_class = EliminarSolicitudSerializer
+    serializer_class = SolicitudDonacionInfoSerializer
     lookup_field = 'id'
