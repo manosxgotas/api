@@ -60,10 +60,34 @@ class GrupoSanguineoSolicitudSerializer(ModelSerializer):
         ]
 
 
+class PacienteSerializer(ModelSerializer):
+    direccion = DireccionSerializer()
+    edad = SerializerMethodField()
+
+    class Meta:
+        model = Paciente
+        fields = [
+            'id',
+            'nombre',
+            'apellido',
+            'email',
+            'nacimiento',
+            'telefono',
+            'genero',
+            'direccion',
+            'edad'
+        ]
+
+    def get_edad(self, obj):
+        today = datetime.date.today()
+        return today.year - obj.nacimiento.year - ((today.month, today.day) < (obj.nacimiento.month, obj.nacimiento.day))
+
+
 class SolicitudDonacionListadoSerializer(ModelSerializer):
     gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
     imagenesSolicitud = ImagenSolicitudDonacionSerializer(many=True)
     centroDonacion = CentroDonacionSerializer()
+    paciente = PacienteSerializer()
 
     class Meta:
         model = SolicitudDonacion
@@ -75,6 +99,7 @@ class SolicitudDonacionListadoSerializer(ModelSerializer):
             'video',
             'fechaHoraInicio',
             'fechaHoraFin',
+            'paciente',
             'tipo',
             'centroDonacion',
             'paciente',
@@ -199,30 +224,7 @@ def create_solicitud_donacion_serializer(usuario):
     return SolicitudDonacionCreateSerializer
 
 
-class PacienteSerializer(ModelSerializer):
-    direccion = DireccionSerializer()
-    edad = SerializerMethodField()
-
-    class Meta:
-        model = Paciente
-        fields = [
-            'id',
-            'nombre',
-            'apellido',
-            'email',
-            'nacimiento',
-            'telefono',
-            'genero',
-            'direccion',
-            'edad'
-        ]
-
-    def get_edad(self, obj):
-        today = datetime.date.today()
-        return today.year - obj.nacimiento.year - ((today.month, today.day) < (obj.nacimiento.month, obj.nacimiento.day))
-
-
-class SolicitudDonacionInfoSerializer (ModelSerializer):
+class SolicitudDonacionInfoSerializer(ModelSerializer):
     centroDonacion = CentroDonacionSerializer()
     paciente = PacienteSerializer()
     gruposSanguineos = GrupoSanguineoSolicitudSerializer(many=True)
@@ -251,18 +253,4 @@ class TipoSolicitudSerializer(ModelSerializer):
 
     class Meta:
         model = TipoSolicitudDonacion
-        fields = '__all__'
-
-
-class SolicitudesDonanteInfoSerializer(ModelSerializer):
-
-    class Meta:
-        model = SolicitudDonacion
-        fields = '__all__'
-        depth = 1
-
-class EliminarSolicitudSerializer(ModelSerializer):
-
-    class Meta:
-        model = SolicitudDonacion
         fields = '__all__'
