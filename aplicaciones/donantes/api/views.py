@@ -3,12 +3,10 @@ from rest_framework.generics import (
     UpdateAPIView,
     )
 
-from aplicaciones.base.api.permissions import IsOwner
-
 from rest_framework.parsers import FormParser, MultiPartParser
 
 from aplicaciones.base.models import (
-    Donante,
+    Donante
     )
 
 from .serializers import (
@@ -20,29 +18,33 @@ from .serializers import (
 
 
 class DonantePerfilAPI(RetrieveAPIView):
-    permission_classes = [IsOwner]
     serializer_class = DonantePerfilSerializer
     queryset = Donante.objects.all()
-    lookup_field = 'usuario_id'
+
+    def get_object(self):
+        return self.request.user.donante
 
 
 class DonanteUpdateAPI(UpdateAPIView):
-    permission_classes = [IsOwner]
     serializer_class = DonanteUpdateSerializer
     queryset = Donante.objects.all()
-    lookup_field = 'usuario_id'
+
+    def get_object(self):
+        return self.request.user.donante
 
 
 class DonanteUpdateDireccionAPI(UpdateAPIView):
-    permission_classes = [IsOwner]
     serializer_class = DonanteUpdateDireccionSerializer
     queryset = Donante.objects.all()
-    lookup_field = 'usuario_id'
+
+    def get_object(self):
+        return self.request.user.donante
 
 
 class DonanteUpdateAvatarAPI(UpdateAPIView):
-    permission_classes = [IsOwner]
     parser_classes = [FormParser, MultiPartParser]
     serializer_class = DonanteUpdateAvatarSerializer
     queryset = Donante.objects.all()
-    lookup_field = 'usuario_id'
+
+    def get_object(self):
+        return self.request.user.donante
