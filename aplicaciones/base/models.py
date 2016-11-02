@@ -151,13 +151,13 @@ class Donante(models.Model):
         blank=True,
         null=True
     )
-    nacimiento = models.DateField(verbose_name='fecha de nacimiento', null=True)
-    peso = models.DecimalField(max_digits=4, decimal_places=1, null=True)
-    altura = models.PositiveIntegerField(null=True, validators=[MinValueValidator(100), MaxValueValidator(350)])
+    nacimiento = models.DateField(verbose_name='fecha de nacimiento', blank=True, null=True)
+    peso = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    altura = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(100), MaxValueValidator(350)])
     genero = GenerosField(verbose_name='género', null=True)
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', blank=True, null=True, verbose_name='grupo sanguíneo')
     direccion = models.ForeignKey('Direccion', verbose_name='dirección', null=True, blank=True)
-    nacionalidad = models.ForeignKey('Nacionalidad', null=True)
+    nacionalidad = models.ForeignKey('Nacionalidad', blank=True, null=True)
 
     def get_genero(self):
         return GENEROS.get(self.genero)
@@ -498,6 +498,7 @@ class Paciente(models.Model):
         null=True
     )
     genero = GenerosField()
+    grupoSanguineo = models.ForeignKey('GrupoSanguineo', default=1)
     direccion = models.ForeignKey('Direccion', verbose_name='dirección', blank=True, null=True)
 
     def __str__(self):
@@ -518,6 +519,7 @@ class CodigoVerificacion(models.Model):
     class Meta:
         verbose_name = 'código de verificación'
         verbose_name_plural = 'códigos de verificación'
+        ordering = ['-fechaEmision']
 
 
 class LugarDonacion(models.Model):
