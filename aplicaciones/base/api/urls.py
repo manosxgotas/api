@@ -9,7 +9,8 @@ from .views import (
     GrupoSanguineoListAPI,
     NacionalidadListAPI,
     TipoDocumentoListAPI,
-    GrupoSanguineoInfoAPI
+    GrupoSanguineoInfoAPI,
+    cantidad_eventos_en_curso
     )
 
 urlpatterns = [
@@ -23,6 +24,8 @@ urlpatterns = [
     url(r'^centro/(?P<id>\w+)$', CentroDonacionInfoAPI.as_view(), name='detalle-centro'),
     url(r'^evento/(?P<id>\w+)$', EventoInfoAPI.as_view(), name='detalle-evento'),
     url(r'^listado-eventos/$', EventoListAPI.as_view(), name='listado-eventos'),
+
+    url(r'^cantidad-eventos/$', cantidad_eventos_en_curso, name='cantidad-eventos'),
 
     # Urls de aplicaciones
     url(r'^cuentas/', include('aplicaciones.cuentas.api.urls', namespace='cuentas')),
