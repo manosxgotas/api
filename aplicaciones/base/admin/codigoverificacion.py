@@ -66,4 +66,11 @@ class CodigoVerificacionAdmin(admin.ModelAdmin):
 
         return render(request, 'admin/base/codigoverificacion/generar.html', context)
 
+    empty_value_display = '--------'
+    list_display = (
+        'codigo',
+        'fechaEmision',
+        'fechaVencimiento'
+    )
+
 admin.site.register(CodigoVerificacion, CodigoVerificacionAdmin)
