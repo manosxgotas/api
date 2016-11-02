@@ -2,7 +2,6 @@
 
 from django.contrib import admin
 
-from .registroDonacion import RegistroDonacionInline
 from ..models import Donante
 
 
@@ -20,10 +19,6 @@ class DonanteAdmin(admin.ModelAdmin):
         'tipoDocumento',
         'numeroDocumento'
     )
-
-    inlines = [
-        RegistroDonacionInline,
-    ]
 
     list_filter = [
         'genero',

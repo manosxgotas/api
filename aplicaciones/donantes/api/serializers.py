@@ -1,16 +1,13 @@
 from rest_framework.serializers import (
     ModelSerializer,
-    IntegerField
+    IntegerField,
+    SerializerMethodField
     )
 from aplicaciones.base.models import (
     Donante,
     Direccion,
     Localidad,
     GrupoSanguineo,
-    )
-
-from aplicaciones.donaciones.api.serializers import (
-    RegistroDonacionSerializer
     )
 
 from django.contrib.auth import get_user_model
@@ -63,7 +60,9 @@ class DonantePerfilSerializer(ModelSerializer):
     usuario = UsuarioPerfilSerializer()
     direccion = DireccionPerfilSerializer()
     grupoSanguineo = GrupoSanguineoPerfilSerializer()
-    registro = RegistroDonacionSerializer()
+    cantidad_donaciones = SerializerMethodField()
+    cantidad_donaciones_pendientes = SerializerMethodField()
+    cantidad_donaciones_verificadas = SerializerMethodField()
 
     class Meta:
         model = Donante
@@ -80,8 +79,35 @@ class DonantePerfilSerializer(ModelSerializer):
             'grupoSanguineo',
             'direccion',
             'nacionalidad',
-            'registro'
+            'cantidad_donaciones',
+            'cantidad_donaciones_pendientes',
+            'cantidad_donaciones_verificadas'
         ]
+
+    def get_cantidad_donaciones(self, obj):
+        return obj.registro.donaciones.count()
+
+    def get_cantidad_donaciones_pendientes(self, obj):
+        cantidad = 0
+        donaciones = obj.registro.donaciones.all()
+        if donaciones.exists():
+            for donacion in donaciones:
+                ultimo_estado = donacion.historicoEstados.last().estado.nombre
+                if ultimo_estado == "Pendiente":
+                    cantidad += 1
+
+        return cantidad
+
+    def get_cantidad_donaciones_verificadas(self, obj):
+        cantidad = 0
+        donaciones = obj.registro.donaciones.all()
+        if donaciones.exists():
+            for donacion in donaciones:
+                ultimo_estado = donacion.historicoEstados.last().estado.nombre
+                if ultimo_estado == "Verificada":
+                    cantidad += 1
+
+        return cantidad
 
 
 class UsuarioUpdateSerializer(ModelSerializer):

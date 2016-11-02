@@ -1,3 +1,4 @@
+import datetime
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 from rest_framework.generics import (
@@ -6,6 +7,12 @@ from rest_framework.generics import (
     ListAPIView,
     DestroyAPIView
     )
+
+from rest_framework.decorators import api_view
+from rest_framework.status import (
+    HTTP_200_OK
+    )
+from rest_framework.response import Response
 
 from aplicaciones.base.models import (
     SolicitudDonacion,
@@ -20,6 +27,8 @@ from .serializers import (
 )
 
 from aplicaciones.base.api.permissions import IsOwnerSolicitud
+
+fecha_hora_actual = datetime.datetime.now()
 
 
 class SolicitudDonacionCreateAPI(CreateAPIView):
@@ -65,3 +74,23 @@ class SolicitudDonacionDeleteAPI(DestroyAPIView):
     queryset = SolicitudDonacion.objects.all()
     serializer_class = SolicitudDonacionInfoSerializer
     lookup_field = 'id'
+
+
+@api_view(['GET'])
+def cantidad_solicitudes_compatibles(request):
+        cantidad = 0
+        donante = request.user.donante
+        solicitudes = SolicitudDonacion.objects.filter(
+            fechaHoraInicio__lte=fecha_hora_actual, fechaHoraFin__gte=fecha_hora_actual
+            )
+        if solicitudes.exists():
+            for solicitud in solicitudes:
+                grupos_compatibles = solicitud.gruposSanguineos.all()
+                for grupo_compatible in grupos_compatibles:
+                    if donante.grupoSanguineo == grupo_compatible.grupoSanguineo:
+                        cantidad += 1
+
+        return Response(
+            {"cantidad_solicitudes_compatibles": cantidad},
+            status=HTTP_200_OK
+        )

@@ -306,6 +306,10 @@ class DonacionAdmin(admin.ModelAdmin):
         HistoricoEstadoDonacionInline,
     ]
 
+    exclude = [
+        'registro'
+    ]
+
     def estado_donacion(self, obj):
         return get_estado_donacion(obj)
 

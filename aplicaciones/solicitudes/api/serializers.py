@@ -12,6 +12,7 @@ from aplicaciones.base.models import (
     SolicitudDonacion,
     TipoSolicitudDonacion,
     Direccion,
+    Donante,
     Paciente,
     Localidad,
     GrupoSanguineoSolicitud,
@@ -19,6 +20,49 @@ from aplicaciones.base.models import (
     ImagenSolicitudDonacion
     )
 from aplicaciones.base.api.serializers import CentroDonacionSerializer
+
+from django.conf import settings
+
+from django.template import loader
+from django.core.mail import EmailMultiAlternatives
+
+
+def enviar_mail_solicitud_donantes_compatibles(grupos_compatibles, solicitudDonacion):
+    # Se genera token con email del usuario.
+
+    # Obtención de templates html y txt de emails.
+    htmly = loader.get_template('emails/html/aviso_solicitud_donacion.html')
+    text = loader.get_template('emails/txt/aviso_solicitud_donacion.txt')
+    solicitud_url = settings.FRONTEND_URL + 'dashboard/solicitud/' + str(solicitudDonacion.id)
+    solicitud_url_publica = settings.FRONTEND_URL + 'solicitud/' + str(solicitudDonacion.id)
+
+    titulo_mail = "¡{0!s} necesita tu ayuda en Manos por gotas!".format(
+        solicitudDonacion.paciente.nombre
+        )
+
+    # Definición de variables de contexto
+    variables = {
+        'solicitud_url': solicitud_url,
+        'solicitud_url_publica': solicitud_url_publica,
+        'solicitud': solicitudDonacion
+    }
+
+    for grupo_compatible in grupos_compatibles:
+        donantes = Donante.objects.filter(grupoSanguineo=grupo_compatible)
+        for donante in donantes:
+            variables['donante'] = donante
+            html_content = htmly.render(variables)
+            text_content = text.render(variables)
+
+            # Creación y envío de email.
+            msg = EmailMultiAlternatives(
+                titulo_mail,
+                text_content,
+                to=[donante.usuario.email]
+            )
+
+            msg.attach_alternative(html_content, "text/html")
+            msg.send()
 
 
 class DireccionSerializer(ModelSerializer):
@@ -71,12 +115,14 @@ class PacienteSerializer(ModelSerializer):
             'nombre',
             'apellido',
             'email',
+            'grupoSanguineo',
             'nacimiento',
             'telefono',
             'genero',
             'direccion',
             'edad'
         ]
+        depth = 1
 
     def get_edad(self, obj):
         today = datetime.date.today()
@@ -193,6 +239,7 @@ def create_solicitud_donacion_serializer(usuario):
             # Obtengo los grupos sanguineos necesarios para la donacion
             grupos = validated_data.pop('grupos')
 
+            grupos_compatibles = []
             # Le asocio cada grupo sanguineo a la solicitud
             for val in grupos:
                 # Convierto de json a list
@@ -205,6 +252,8 @@ def create_solicitud_donacion_serializer(usuario):
                             solicitud=solicitudDonacion,
                             grupoSanguineo=grupoSanguineo
                         )
+
+                        grupos_compatibles.append(grupoSanguineo)
 
             if imagenes is not None:
                 for index, imagen in enumerate(imagenes):
@@ -219,6 +268,8 @@ def create_solicitud_donacion_serializer(usuario):
                             imagen=imagen,
                             solicitud=solicitudDonacion
                         )
+
+            # enviar_mail_solicitud_donantes_compatibles(grupos_compatibles, solicitudDonacion)
 
             return solicitudDonacion
     return SolicitudDonacionCreateSerializer

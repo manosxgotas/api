@@ -24,13 +24,15 @@ from aplicaciones.base.models import (
     Donacion,
     EstadoDonacion,
     HistoricoEstadoDonacion,
+    RegistroDonacion,
     DIAS_DONACION_POR_GENERO
     )
 
 from .serializers import (
     create_update_destroy_donacion_serializer,
-    DonacionPerfilSerializer,
-    VerificarImagenDonacionSerializer
+    DonacionSerializer,
+    VerificarImagenDonacionSerializer,
+    RegistroDonacionSerializer
     )
 
 
@@ -74,7 +76,7 @@ class DonacionDestroyAPI(DestroyAPIView):
 class DonacionInfoAPI(RetrieveAPIView):
     permission_classes = [IsOwnerDonacion]
     queryset = Donacion.objects.all()
-    serializer_class = DonacionPerfilSerializer
+    serializer_class = DonacionSerializer
     lookup_field = 'id'
 
 
@@ -85,11 +87,19 @@ class VerificarImagenDonacionAPI(UpdateAPIView):
     lookup_field = 'id'
 
 
+class RegistroDonacionInfoAPI(RetrieveAPIView):
+    serializer_class = RegistroDonacionSerializer
+    queryset = RegistroDonacion.objects.all()
+
+    def get_object(self):
+        return self.request.user.donante.registro
+
+
 @api_view(['GET'])
-def dias_proxima_donacion(request, usuario_id):
+def dias_proxima_donacion(request):
 
     # Obtengo donante por id de usuario.
-    donante = Donante.objects.get(usuario__id=usuario_id)
+    donante = request.user.donante
 
     # Obtengo el listado de donaciones del donante ordenadas por fecha y hora.
     donaciones_donante = donante.registro.donaciones.order_by("fechaHora")

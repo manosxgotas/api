@@ -1,3 +1,4 @@
+import datetime
 from .serializers import (
     CentroDonacionSerializer,
     DonanteSerializer,
@@ -7,6 +8,15 @@ from .serializers import (
     TipoDocumentoSerializer,
     GrupoSanguineoInfoSerializer
     )
+
+from rest_framework.decorators import api_view
+
+from rest_framework.status import (
+    HTTP_200_OK
+    )
+
+from rest_framework.response import Response
+
 from aplicaciones.base.models import (
     CentroDonacion,
     Donante,
@@ -18,10 +28,12 @@ from aplicaciones.base.models import (
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
 
+fecha_hora_actual = datetime.datetime.now()
+
 
 class CentroDonacionListAPI(ListAPIView):
     permission_classes = [AllowAny]
-    queryset = CentroDonacion.objects.all()
+    queryset = CentroDonacion.objects.filter(activo=True)
     serializer_class = CentroDonacionSerializer
 
 
@@ -70,3 +82,15 @@ class GrupoSanguineoInfoAPI(RetrieveAPIView):
     serializer_class = GrupoSanguineoInfoSerializer
     lookup_field = 'id'
 
+
+@api_view(['GET'])
+def cantidad_eventos_en_curso(request):
+        eventos = Evento.objects.filter(
+            fechaHoraInicio__lte=fecha_hora_actual, fechaHoraFin__gte=fecha_hora_actual
+            )
+        cantidad = eventos.count()
+
+        return Response(
+            {"cantidad_eventos_en_curso": cantidad},
+            status=HTTP_200_OK
+        )

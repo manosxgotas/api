@@ -66,10 +66,13 @@ MESES = {
     12: _(u'Diciembre')
 }
 
+fecha_actual = datetime.datetime.now().date()
+fecha_hora_actual = datetime.datetime.today()
+
 
 def validate_fecha_hora_futuro(value):
     if value > datetime.datetime.now():
-        raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
+        raise ValidationError('La fecha y hora ingresada no puede ser futura.')
 
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
@@ -137,7 +140,7 @@ class SentimientosField(models.CharField):
 class Donante(models.Model):
     usuario = models.OneToOneField(User, related_name='donante')
     numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento', blank=True, null=True)
-    tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento', null=True, blank=True)
+    tipoDocumento = models.ForeignKey('TipoDocumento', on_delete=models.SET_NULL, verbose_name='tipo de documento', null=True, blank=True)
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
     telefono = models.CharField(
         validators=[
@@ -151,13 +154,13 @@ class Donante(models.Model):
         blank=True,
         null=True
     )
-    nacimiento = models.DateField(verbose_name='fecha de nacimiento', null=True)
-    peso = models.DecimalField(max_digits=4, decimal_places=1, null=True)
-    altura = models.PositiveIntegerField(null=True, validators=[MinValueValidator(100), MaxValueValidator(350)])
+    nacimiento = models.DateField(verbose_name='fecha de nacimiento', blank=True, null=True)
+    peso = models.DecimalField(max_digits=4, decimal_places=1, validators=[MinValueValidator(40), MaxValueValidator(350)], blank=True, null=True, verbose_name='peso en kg.')
+    altura = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(100), MaxValueValidator(350)], verbose_name='altura en cm.')
     genero = GenerosField(verbose_name='género', null=True)
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', blank=True, null=True, verbose_name='grupo sanguíneo')
     direccion = models.ForeignKey('Direccion', verbose_name='dirección', null=True, blank=True)
-    nacionalidad = models.ForeignKey('Nacionalidad', null=True)
+    nacionalidad = models.ForeignKey('Nacionalidad', on_delete=models.SET_NULL, blank=True, null=True)
 
     def get_genero(self):
         return GENEROS.get(self.genero)
@@ -190,6 +193,15 @@ class Donante(models.Model):
 
             user.save()
 
+    def clean(self):
+        super(Donante, self).clean()
+        if self.nacimiento and self.nacimiento > fecha_actual:
+            raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
+        if self.numeroDocumento and not self.tipoDocumento:
+            raise ValidationError({'numeroDocumento': ['Si ingresas número de documento también debes ingresar el tipo de documento', ]})
+        if not self.numeroDocumento and self.tipoDocumento:
+            raise ValidationError({'tipoDocumento': ['Si ingresas tipo de documento también debes ingresar el número de documento', ]})
+
 
 class Nacionalidad(models.Model):
     nombre = models.CharField(max_length=20)
@@ -199,6 +211,7 @@ class Nacionalidad(models.Model):
 
     class Meta:
         verbose_name_plural = 'nacionalidades'
+        ordering = ['nombre']
 
 
 class TipoDocumento(models.Model):
@@ -211,6 +224,7 @@ class TipoDocumento(models.Model):
     class Meta:
         verbose_name = 'tipo de documento'
         verbose_name_plural = 'tipos de documento'
+        ordering = ['siglas']
 
 
 class Direccion(models.Model):
@@ -258,10 +272,10 @@ class GrupoSanguineo(models.Model):
     class Meta:
         verbose_name = 'grupo sanguíneo'
         verbose_name_plural = 'grupos sanguíneos'
+        ordering = ['nombre']
 
 
 class RegistroDonacion(models.Model):
-    privado = models.BooleanField(default=True)
     donante = models.OneToOneField('Donante', related_name='registro')
 
     def __str__(self):
@@ -287,6 +301,7 @@ class Donacion(models.Model):
     class Meta:
         verbose_name = 'donación'
         verbose_name_plural = 'donaciones'
+        ordering = ['-fechaHora']
 
 
 class EstadoDonacion(models.Model):
@@ -299,6 +314,7 @@ class EstadoDonacion(models.Model):
     class Meta:
         verbose_name = 'estado de la donación'
         verbose_name_plural = 'estados de la donación'
+        ordering = ['nombre']
 
 
 class HistoricoEstadoDonacion(models.Model):
@@ -314,16 +330,21 @@ class HistoricoEstadoDonacion(models.Model):
         verbose_name = 'histórico de estados de donación'
         verbose_name_plural = 'históricos de estados de donación'
 
+    def clean(self):
+        super(HistoricoEstadoDonacion, self).clean()
+        if self.fin and self.inicio >= self.fin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización del histórico.")
+
 
 class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
     fechaPublicacion = models.DateField(verbose_name='fecha de publicación', auto_now_add=True)
     donantesNecesarios = models.SmallIntegerField(verbose_name='cantidad de donantes necesarios')
-    video = models.FileField(blank=True, null=True,upload_to=establecer_destino_imagen_ubicacion)
+    video = models.FileField(blank=True, null=True, upload_to=establecer_destino_imagen_ubicacion)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de fin')
     tipo = models.ForeignKey('TipoSolicitudDonacion', verbose_name='tipo de solicitud de donación')
-    centroDonacion = models.ForeignKey('CentroDonacion', null=True, blank=True, verbose_name='centro de donación')
+    centroDonacion = models.ForeignKey('CentroDonacion', default=1, verbose_name='centro de donación')
     paciente = models.ForeignKey('Paciente')
     donante = models.ForeignKey('Donante')
     historia = models.TextField(blank=True, null=True)
@@ -334,6 +355,16 @@ class SolicitudDonacion(models.Model):
     class Meta:
         verbose_name = 'solicitud de donación'
         verbose_name_plural = 'solicitudes de donación'
+        ordering = ['-fechaPublicacion']
+
+    def clean(self):
+        super(SolicitudDonacion, self).clean()
+        if self.fechaHoraInicio > self.fechaHoraFin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización de la solicitud.")
+        else:
+            dias_diferencia = (self.fechaHoraFin - self.fechaHoraInicio).days
+            if dias_diferencia > 60:
+                raise ValidationError("La solicitud no puede estar activa por más de dos meses.")
 
 
 class TipoSolicitudDonacion(models.Model):
@@ -346,6 +377,7 @@ class TipoSolicitudDonacion(models.Model):
     class Meta:
         verbose_name = 'tipo de solicitud de donación'
         verbose_name_plural = 'tipos de solicitud de donación'
+        ordering = ['nombre']
 
 
 class ImagenSolicitudDonacion(models.Model):
@@ -384,6 +416,18 @@ class Evento(models.Model):
     def __str__(self):
         return self.nombre
 
+    class Meta:
+        ordering = ['fechaHoraInicio']
+
+    def clean(self):
+        super(Evento, self).clean()
+        if self.fechaHoraInicio > self.fechaHoraFin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización del evento.")
+        else:
+            dias_diferencia = (self.fechaHoraFin - self.fechaHoraInicio).days
+            if dias_diferencia > 365:
+                raise ValidationError("El evento no puede estar activo por más de un año.")
+
 
 class LugarEvento(models.Model):
     evento = models.ForeignKey('Evento', related_name='lugarEvento')
@@ -414,6 +458,7 @@ class CategoriaEvento(models.Model):
     class Meta:
         verbose_name = 'categoría del evento'
         verbose_name_plural = 'categorías del evento'
+        ordering = ['nombre']
 
 
 class CentroDonacion(models.Model):
@@ -432,6 +477,7 @@ class CentroDonacion(models.Model):
         null=True
     )
     lugarDonacion = models.OneToOneField('LugarDonacion', related_name='lugarCentro', on_delete=models.CASCADE)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre
@@ -452,6 +498,7 @@ class TipoCentroDonacion(models.Model):
     class Meta:
         verbose_name = 'tipo de centro de donación'
         verbose_name_plural = 'tipos de centro de donación'
+        ordering = ['nombre']
 
 
 class HorarioCentroDonacion(models.Model):
@@ -486,13 +533,19 @@ class Paciente(models.Model):
         null=True
     )
     genero = GenerosField()
-    direccion = models.ForeignKey('Direccion', verbose_name='dirección',blank=True,null=True)
+    grupoSanguineo = models.ForeignKey('GrupoSanguineo', default=1)
+    direccion = models.ForeignKey('Direccion', verbose_name='dirección', blank=True, null=True)
 
     def __str__(self):
         return self.nombre + ' ' + self.apellido
 
     def get_genero(self):
         return GENEROS.get(self.genero)
+
+    def clean(self):
+        super(Paciente, self).clean()
+        if self.nacimiento and self.nacimiento > fecha_actual:
+            raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
 
 
 class CodigoVerificacion(models.Model):
@@ -506,6 +559,12 @@ class CodigoVerificacion(models.Model):
     class Meta:
         verbose_name = 'código de verificación'
         verbose_name_plural = 'códigos de verificación'
+        ordering = ['-fechaEmision']
+
+    def clean(self):
+        super(CodigoVerificacion, self).clean()
+        if self.fechaEmision >= self.fechaVencimiento:
+            raise ValidationError('La fecha de emisión no puede ser mayor a la fecha de vencimiento.')
 
 
 class LugarDonacion(models.Model):
