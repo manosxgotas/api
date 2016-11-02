@@ -206,6 +206,9 @@ def create_solicitud_donacion_serializer(usuario):
             historia = validated_data.get('historia', None)
             imagenes = validated_data.get('imagenes', None)
             paciente_data = validated_data.pop('paciente')
+
+            grupo_paciente_data = paciente_data.pop('grupoSanguineo')
+            grupo_paciente = GrupoSanguineo.objects.get(id=int(grupo_paciente_data))
             direccion_data = paciente_data.pop('direccion')
 
             localidad_id = direccion_data.pop('localidad')
@@ -217,6 +220,7 @@ def create_solicitud_donacion_serializer(usuario):
 
             paciente_obj = Paciente.objects.create(
                 direccion=direccion_obj,
+                grupoSanguineo=grupo_paciente,
                 **paciente_data
             )
 
