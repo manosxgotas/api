@@ -33,7 +33,7 @@ fecha_hora_actual = datetime.datetime.now()
 
 class CentroDonacionListAPI(ListAPIView):
     permission_classes = [AllowAny]
-    queryset = CentroDonacion.objects.all()
+    queryset = CentroDonacion.objects.filter(activo=True)
     serializer_class = CentroDonacionSerializer
 
 
