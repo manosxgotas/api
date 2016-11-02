@@ -1,0 +1,14 @@
+{{ donante.usuario.first_name }} queríamos informarte que se ha iniciado una solicitud de donación para {{ solicitud.paciente.nombre }} y tú puedes ayudar!
+
+¡Tu grupo sanguíneo es compatible, no pierdas la oportunidad de salvar una vida!
+
+¡Ingresá a Manos por Gotas! Enterate de todos los detalles sobre la solicitud en el siguiente link:
+
+{{ solicitud_url }}
+
+Para compartir la solicitud de donación de {{ solicitud.paciente.nombre }} puedes utilizar el siguiente link:
+
+{{ solicitud_url_publica }}
+
+Atentamente,
+Equipo de Manos por gotas.

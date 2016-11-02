@@ -1,0 +1,12 @@
+<p>{{ donante.usuario.first_name }} queríamos informarte que se ha iniciado una solicitud de donación para {{ solicitud.paciente.nombre }} {{ solicitud.paciente.apellido }} y tú puedes ayudar!</p>
+<p>¡Tu grupo sanguíneo es compatible, no pierdas la oportunidad de salvar una vida!</p>
+<p>¡Ingresá a Manos por Gotas! Enterate de todos los detalles sobre la solicitud en el siguiente link:</p>
+
+<a href="{{ solicitud_url }}">{{ solicitud_url }}</a>
+
+<p>Para compartir la solicitud de donación de {{ solicitud.paciente.nombre }} puedes utilizar el siguiente link:</p>
+
+<a href="{{ solicitud_url_publica }}">{{ solicitud_url_publica }}</a>
+
+<p>Atentamente,</p>
+<p>Equipo de Manos por gotas.</p>
