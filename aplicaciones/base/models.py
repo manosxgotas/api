@@ -140,7 +140,7 @@ class SentimientosField(models.CharField):
 class Donante(models.Model):
     usuario = models.OneToOneField(User, related_name='donante')
     numeroDocumento = models.PositiveIntegerField(unique=True, verbose_name='número de documento', blank=True, null=True)
-    tipoDocumento = models.ForeignKey('TipoDocumento', verbose_name='tipo de documento', null=True, blank=True)
+    tipoDocumento = models.ForeignKey('TipoDocumento', on_delete=models.SET_NULL, verbose_name='tipo de documento', null=True, blank=True)
     foto = models.ImageField(null=True, blank=True, upload_to=establecer_destino_imagen_ubicacion)
     telefono = models.CharField(
         validators=[
@@ -155,12 +155,12 @@ class Donante(models.Model):
         null=True
     )
     nacimiento = models.DateField(verbose_name='fecha de nacimiento', blank=True, null=True)
-    peso = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
-    altura = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(100), MaxValueValidator(350)])
+    peso = models.DecimalField(max_digits=4, decimal_places=1, validators=[MinValueValidator(40), MaxValueValidator(350)], blank=True, null=True, verbose_name='peso en kg.')
+    altura = models.PositiveIntegerField(blank=True, null=True, validators=[MinValueValidator(100), MaxValueValidator(350)], verbose_name='altura en cm.')
     genero = GenerosField(verbose_name='género', null=True)
     grupoSanguineo = models.ForeignKey('GrupoSanguineo', blank=True, null=True, verbose_name='grupo sanguíneo')
     direccion = models.ForeignKey('Direccion', verbose_name='dirección', null=True, blank=True)
-    nacionalidad = models.ForeignKey('Nacionalidad', blank=True, null=True)
+    nacionalidad = models.ForeignKey('Nacionalidad', on_delete=models.SET_NULL, blank=True, null=True)
 
     def get_genero(self):
         return GENEROS.get(self.genero)
@@ -195,8 +195,12 @@ class Donante(models.Model):
 
     def clean(self):
         super(Donante, self).clean()
-        if self.nacimiento > fecha_actual:
+        if self.nacimiento and self.nacimiento > fecha_actual:
             raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
+        if self.numeroDocumento and not self.tipoDocumento:
+            raise ValidationError({'numeroDocumento': ['Si ingresas número de documento también debes ingresar el tipo de documento', ]})
+        if not self.numeroDocumento and self.tipoDocumento:
+            raise ValidationError({'tipoDocumento': ['Si ingresas tipo de documento también debes ingresar el número de documento', ]})
 
 
 class Nacionalidad(models.Model):
@@ -419,6 +423,10 @@ class Evento(models.Model):
         super(Evento, self).clean()
         if self.fechaHoraInicio > self.fechaHoraFin:
             raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización del evento.")
+        else:
+            dias_diferencia = (self.fechaHoraFin - self.fechaHoraInicio).days
+            if dias_diferencia > 365:
+                raise ValidationError("El evento no puede estar activo por más de un año.")
 
 
 class LugarEvento(models.Model):
@@ -469,6 +477,7 @@ class CentroDonacion(models.Model):
         null=True
     )
     lugarDonacion = models.OneToOneField('LugarDonacion', related_name='lugarCentro', on_delete=models.CASCADE)
+    activo = models.BooleanField(default=True)
 
     def __str__(self):
         return self.nombre
@@ -535,7 +544,7 @@ class Paciente(models.Model):
 
     def clean(self):
         super(Paciente, self).clean()
-        if self.nacimiento > fecha_actual:
+        if self.nacimiento and self.nacimiento > fecha_actual:
             raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
 
 
