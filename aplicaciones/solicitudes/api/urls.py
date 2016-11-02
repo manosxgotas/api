@@ -6,7 +6,8 @@ from .views import (
     TipoSolicitudAPI,
     SolicitudesInfoAPI,
     SolicitudesDonanteListAPI,
-    SolicitudDonacionDeleteAPI
+    SolicitudDonacionDeleteAPI,
+    cantidad_solicitudes_compatibles
     )
 
 urlpatterns = [
@@ -42,5 +43,10 @@ urlpatterns = [
         r'^eliminar/(?P<id>\w+)$',
         SolicitudDonacionDeleteAPI.as_view(),
         name='eliminar-solicitud'
+    ),
+    url(
+        r'^solicitudes-compatibles/$',
+        cantidad_solicitudes_compatibles,
+        name='solicitudes-compatibles'
     ),
 ]
