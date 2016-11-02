@@ -145,7 +145,7 @@ def create_update_destroy_donacion_serializer(usuario):
     return DonacionCreateUpdateDestroySerializer
 
 
-class DonacionPerfilSerializer(ModelSerializer):
+class DonacionSerializer(ModelSerializer):
     lugarDonacion = LugarDonacionSerializer()
 
     class Meta:
@@ -165,7 +165,7 @@ class DonacionPerfilSerializer(ModelSerializer):
 
 
 class RegistroDonacionSerializer(ModelSerializer):
-    donaciones = DonacionPerfilSerializer(many=True)
+    donaciones = DonacionSerializer(many=True)
 
     class Meta:
         model = RegistroDonacion

@@ -6,6 +6,7 @@ from .views import (
     DonacionDestroyAPI,
     DonacionInfoAPI,
     VerificarImagenDonacionAPI,
+    RegistroDonacionInfoAPI,
     dias_proxima_donacion,
     verificar_codigo_donacion
     )
@@ -37,7 +38,7 @@ urlpatterns = [
         ),
 
     url(
-        r'^proxima-donacion/(?P<usuario_id>\w+)$',
+        r'^proxima-donacion/$',
         dias_proxima_donacion,
         name='dias-proxima-donacion'
         ),
@@ -52,5 +53,11 @@ urlpatterns = [
         r'^verificar-imagen/(?P<id>\w+)$',
         VerificarImagenDonacionAPI.as_view(),
         name='verificar-imagen-donacion'
+        ),
+
+    url(
+        r'^registro-donaciones/$',
+        RegistroDonacionInfoAPI.as_view(),
+        name='registro-donaciones'
         )
     ]
