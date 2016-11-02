@@ -199,6 +199,7 @@ class Nacionalidad(models.Model):
 
     class Meta:
         verbose_name_plural = 'nacionalidades'
+        ordering = ['nombre']
 
 
 class TipoDocumento(models.Model):
@@ -211,6 +212,7 @@ class TipoDocumento(models.Model):
     class Meta:
         verbose_name = 'tipo de documento'
         verbose_name_plural = 'tipos de documento'
+        ordering = ['siglas']
 
 
 class Direccion(models.Model):
@@ -258,6 +260,7 @@ class GrupoSanguineo(models.Model):
     class Meta:
         verbose_name = 'grupo sanguíneo'
         verbose_name_plural = 'grupos sanguíneos'
+        ordering = ['nombre']
 
 
 class RegistroDonacion(models.Model):
@@ -287,6 +290,7 @@ class Donacion(models.Model):
     class Meta:
         verbose_name = 'donación'
         verbose_name_plural = 'donaciones'
+        ordering = ['-fechaHora']
 
 
 class EstadoDonacion(models.Model):
@@ -299,6 +303,7 @@ class EstadoDonacion(models.Model):
     class Meta:
         verbose_name = 'estado de la donación'
         verbose_name_plural = 'estados de la donación'
+        ordering = ['nombre']
 
 
 class HistoricoEstadoDonacion(models.Model):
@@ -319,7 +324,7 @@ class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
     fechaPublicacion = models.DateField(verbose_name='fecha de publicación', auto_now_add=True)
     donantesNecesarios = models.SmallIntegerField(verbose_name='cantidad de donantes necesarios')
-    video = models.FileField(blank=True, null=True,upload_to=establecer_destino_imagen_ubicacion)
+    video = models.FileField(blank=True, null=True, upload_to=establecer_destino_imagen_ubicacion)
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de fin')
     tipo = models.ForeignKey('TipoSolicitudDonacion', verbose_name='tipo de solicitud de donación')
@@ -334,6 +339,7 @@ class SolicitudDonacion(models.Model):
     class Meta:
         verbose_name = 'solicitud de donación'
         verbose_name_plural = 'solicitudes de donación'
+        ordering = ['-fechaPublicacion']
 
 
 class TipoSolicitudDonacion(models.Model):
@@ -346,6 +352,7 @@ class TipoSolicitudDonacion(models.Model):
     class Meta:
         verbose_name = 'tipo de solicitud de donación'
         verbose_name_plural = 'tipos de solicitud de donación'
+        ordering = ['nombre']
 
 
 class ImagenSolicitudDonacion(models.Model):
@@ -384,6 +391,9 @@ class Evento(models.Model):
     def __str__(self):
         return self.nombre
 
+    class Meta:
+        ordering = ['fechaHoraInicio']
+
 
 class LugarEvento(models.Model):
     evento = models.ForeignKey('Evento', related_name='lugarEvento')
@@ -414,6 +424,7 @@ class CategoriaEvento(models.Model):
     class Meta:
         verbose_name = 'categoría del evento'
         verbose_name_plural = 'categorías del evento'
+        ordering = ['nombre']
 
 
 class CentroDonacion(models.Model):
@@ -452,6 +463,7 @@ class TipoCentroDonacion(models.Model):
     class Meta:
         verbose_name = 'tipo de centro de donación'
         verbose_name_plural = 'tipos de centro de donación'
+        ordering = ['nombre']
 
 
 class HorarioCentroDonacion(models.Model):
@@ -486,7 +498,7 @@ class Paciente(models.Model):
         null=True
     )
     genero = GenerosField()
-    direccion = models.ForeignKey('Direccion', verbose_name='dirección',blank=True,null=True)
+    direccion = models.ForeignKey('Direccion', verbose_name='dirección', blank=True, null=True)
 
     def __str__(self):
         return self.nombre + ' ' + self.apellido
