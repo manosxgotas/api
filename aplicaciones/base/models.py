@@ -66,10 +66,13 @@ MESES = {
     12: _(u'Diciembre')
 }
 
+fecha_actual = datetime.datetime.now().date()
+fecha_hora_actual = datetime.datetime.today()
+
 
 def validate_fecha_hora_futuro(value):
     if value > datetime.datetime.now():
-        raise ValidationError('La fecha y hora ingresada no pueden ser futuras.')
+        raise ValidationError('La fecha y hora ingresada no puede ser futura.')
 
 
 def establecer_destino_imagen_ubicacion(instance, imagename):
@@ -190,6 +193,11 @@ class Donante(models.Model):
 
             user.save()
 
+    def clean(self):
+        super(Donante, self).clean()
+        if self.nacimiento > fecha_actual:
+            raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
+
 
 class Nacionalidad(models.Model):
     nombre = models.CharField(max_length=20)
@@ -264,7 +272,6 @@ class GrupoSanguineo(models.Model):
 
 
 class RegistroDonacion(models.Model):
-    privado = models.BooleanField(default=True)
     donante = models.OneToOneField('Donante', related_name='registro')
 
     def __str__(self):
@@ -319,6 +326,11 @@ class HistoricoEstadoDonacion(models.Model):
         verbose_name = 'histórico de estados de donación'
         verbose_name_plural = 'históricos de estados de donación'
 
+    def clean(self):
+        super(HistoricoEstadoDonacion, self).clean()
+        if self.fin and self.inicio >= self.fin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización del histórico.")
+
 
 class SolicitudDonacion(models.Model):
     titulo = models.CharField(max_length=50)
@@ -328,7 +340,7 @@ class SolicitudDonacion(models.Model):
     fechaHoraInicio = models.DateTimeField(verbose_name='fecha y hora de inicio')
     fechaHoraFin = models.DateTimeField(verbose_name='fecha y hora de fin')
     tipo = models.ForeignKey('TipoSolicitudDonacion', verbose_name='tipo de solicitud de donación')
-    centroDonacion = models.ForeignKey('CentroDonacion', null=True, blank=True, verbose_name='centro de donación')
+    centroDonacion = models.ForeignKey('CentroDonacion', default=1, verbose_name='centro de donación')
     paciente = models.ForeignKey('Paciente')
     donante = models.ForeignKey('Donante')
     historia = models.TextField(blank=True, null=True)
@@ -340,6 +352,15 @@ class SolicitudDonacion(models.Model):
         verbose_name = 'solicitud de donación'
         verbose_name_plural = 'solicitudes de donación'
         ordering = ['-fechaPublicacion']
+
+    def clean(self):
+        super(SolicitudDonacion, self).clean()
+        if self.fechaHoraInicio > self.fechaHoraFin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización de la solicitud.")
+        else:
+            dias_diferencia = (self.fechaHoraFin - self.fechaHoraInicio).days
+            if dias_diferencia > 60:
+                raise ValidationError("La solicitud no puede estar activa por más de dos meses.")
 
 
 class TipoSolicitudDonacion(models.Model):
@@ -393,6 +414,11 @@ class Evento(models.Model):
 
     class Meta:
         ordering = ['fechaHoraInicio']
+
+    def clean(self):
+        super(Evento, self).clean()
+        if self.fechaHoraInicio > self.fechaHoraFin:
+            raise ValidationError("La fecha y hora de inicio no puede ser mayor a la fecha y hora de finalización del evento.")
 
 
 class LugarEvento(models.Model):
@@ -507,6 +533,11 @@ class Paciente(models.Model):
     def get_genero(self):
         return GENEROS.get(self.genero)
 
+    def clean(self):
+        super(Paciente, self).clean()
+        if self.nacimiento > fecha_actual:
+            raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
+
 
 class CodigoVerificacion(models.Model):
     codigo = models.CharField(max_length=12, unique=True, default=obtener_codigo_aleatorio)
@@ -520,6 +551,11 @@ class CodigoVerificacion(models.Model):
         verbose_name = 'código de verificación'
         verbose_name_plural = 'códigos de verificación'
         ordering = ['-fechaEmision']
+
+    def clean(self):
+        super(CodigoVerificacion, self).clean()
+        if self.fechaEmision >= self.fechaVencimiento:
+            raise ValidationError('La fecha de emisión no puede ser mayor a la fecha de vencimiento.')
 
 
 class LugarDonacion(models.Model):

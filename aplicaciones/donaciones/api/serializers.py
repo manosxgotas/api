@@ -171,7 +171,6 @@ class RegistroDonacionSerializer(ModelSerializer):
         model = RegistroDonacion
         fields = [
             'id',
-            'privado',
             'donaciones'
         ]
         depth = 1
