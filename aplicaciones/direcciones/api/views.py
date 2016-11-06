@@ -16,11 +16,11 @@ class ProvinciaListAPI(ListAPIView):
     queryset = Provincia.objects.all()
     serializer_class = ProvinciaSerializer
 
+
 class LocalidadListAPI(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = LocalidadSerializer
 
     def get_queryset(self):
-        queryset = Localidad.objects.all()
         provincia_id = self.kwargs['provincia_id']
         return Localidad.objects.filter(provincia__id=provincia_id)

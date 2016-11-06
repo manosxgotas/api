@@ -28,8 +28,6 @@ from .serializers import (
 
 from aplicaciones.base.api.permissions import IsOwnerSolicitud
 
-fecha_hora_actual = datetime.datetime.now()
-
 
 class SolicitudDonacionCreateAPI(CreateAPIView):
     queryset = SolicitudDonacion.objects.all()
@@ -79,6 +77,7 @@ class SolicitudDonacionDeleteAPI(DestroyAPIView):
 @api_view(['GET'])
 def cantidad_solicitudes_compatibles(request):
         cantidad = 0
+        fecha_hora_actual = datetime.datetime.now()
         donante = request.user.donante
         solicitudes = SolicitudDonacion.objects.filter(
             fechaHoraInicio__lte=fecha_hora_actual, fechaHoraFin__gte=fecha_hora_actual

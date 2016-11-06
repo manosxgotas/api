@@ -66,9 +66,6 @@ MESES = {
     12: _(u'Diciembre')
 }
 
-fecha_actual = datetime.datetime.now().date()
-fecha_hora_actual = datetime.datetime.today()
-
 
 def validate_fecha_hora_futuro(value):
     if value > datetime.datetime.now():
@@ -195,6 +192,7 @@ class Donante(models.Model):
 
     def clean(self):
         super(Donante, self).clean()
+        fecha_actual = datetime.date.today()
         if self.nacimiento and self.nacimiento > fecha_actual:
             raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
         if self.numeroDocumento and not self.tipoDocumento:
@@ -544,6 +542,7 @@ class Paciente(models.Model):
 
     def clean(self):
         super(Paciente, self).clean()
+        fecha_actual = datetime.date.today()
         if self.nacimiento and self.nacimiento > fecha_actual:
             raise ValidationError({'nacimiento': ["La fecha de nacimiento no puede ser mayor a la fecha actual", ]})
 
