@@ -134,33 +134,17 @@ class DonacionAdmin(admin.ModelAdmin):
                 # Step 1: Create a DataPool with the data we want to retrieve.
 
                 def grupos_etarios(x):
-                    edad = int(x[0])
                     grupos = {
-                        "<18": 'Menores de 18 años',
-                        ">18": 'Entre 18 y 25 años',
-                        ">25": 'Entre 25 y 30 años',
-                        ">30": 'Entre 30 y 40 años',
-                        ">40": 'Entre 40 y 50 años',
-                        ">50": 'Entre 50 y 60 años',
-                        ">60": 'Mayor de 60 años',
+                        1: 'Menores de 18 años',
+                        2: 'Entre 18 y 25 años',
+                        3: 'Entre 25 y 30 años',
+                        4: 'Entre 30 y 40 años',
+                        5: 'Entre 40 y 50 años',
+                        6: 'Entre 50 y 60 años',
+                        7: 'Mayor de 60 años',
                     }
 
-                    if edad >= 18 and edad < 25:
-                        categoria = ">18"
-                    elif edad >= 25 and edad < 30:
-                        categoria = ">25"
-                    elif edad >= 30 and edad < 40:
-                        categoria = ">30"
-                    elif edad >= 40 and edad < 50:
-                        categoria = ">40"
-                    elif edad >= 50 and edad < 60:
-                        categoria = ">50"
-                    elif edad >= 60:
-                        categoria = ">60"
-                    else:
-                        categoria = "<18"
-
-                    return (grupos[categoria],)
+                    return (grupos[int(x[0])],)
 
                 def meses_anio(x):
                     mes = int(x[0])
@@ -174,7 +158,7 @@ class DonacionAdmin(admin.ModelAdmin):
 
                 if categoria == "mes":
                     categories = 'mes'
-                    sortf_mapf_mts = (None, meses_anio, True)
+                    sortf_mapf_mts = (lambda x: (int(x[0]),), meses_anio, False)
                     queryset = donacion_qs\
                         .extra(select={'mes': 'CAST(EXTRACT(month from "base_donacion"."fechaHora") AS INT)'})
 
@@ -185,13 +169,22 @@ class DonacionAdmin(admin.ModelAdmin):
 
                 elif categoria == "edad":
                     categories = 'edad'
-                    sortf_mapf_mts = (None, grupos_etarios, False)
+                    sortf_mapf_mts = (lambda x: (int(x[0]),), grupos_etarios, False)
                     queryset = donacion_qs\
                         .exclude(registro__donante__nacimiento__isnull=True)\
                         .extra(select={
                             'edad':
                             """
-                                select CAST(EXTRACT(YEAR from AGE(CURRENT_DATE, nacimiento)) AS INT)
+                                SELECT
+                                    CASE
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)<18 then 1
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=18 and CAST(date_part('year', age(nacimiento)) AS INT)<25 then 2
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=25 and CAST(date_part('year', age(nacimiento)) AS INT)<30 then 3
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=30 and CAST(date_part('year', age(nacimiento)) AS INT)<40 then 4
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=40 and CAST(date_part('year', age(nacimiento)) AS INT)<50 then 5
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=50 and CAST(date_part('year', age(nacimiento)) AS INT)<60 then 6
+                                        when CAST(date_part('year', age(nacimiento)) AS INT)>=60 then 7
+                                    END
                                 from base_donante where base_donacion.registro_id = base_registrodonacion.id
                                 and base_registrodonacion.donante_id = base_donante.id
                             """

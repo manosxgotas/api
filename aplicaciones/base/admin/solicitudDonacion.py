@@ -68,36 +68,38 @@ class SolicitudDonacionAdmin(admin.ModelAdmin):
 
                 # Step 1: Create a DataPool with the data we want to retrieve.
                 def meses_anio(x):
-                    mes = int(x[0])
-                    return (MESES[mes],)
+                    return (MESES[int(x[0])],)
 
                 def cantidad_donantes(x):
-                    cantidad_donantes = int(x[0])
                     donantes = {
-                        "<5": 'Menos de 5',
-                        "<10": 'Entre 5 y 10',
-                        ">10": 'Más de 10',
+                        1: 'Menos de 5',
+                        2: 'Entre 5 y 10',
+                        3: 'Más de 10',
                     }
 
-                    if cantidad_donantes < 5:
-                        cantidad = "<5"
-                    elif cantidad_donantes >= 5 and cantidad_donantes < 10:
-                        cantidad = "<10"
-                    else:
-                        cantidad = ">10"
-
-                    return (donantes[cantidad],)
+                    return (donantes[int(x[0])],)
 
                 sortf_mapf_mts = None
                 legend_by = None
 
                 if categoria == "meses":
                     categories = 'mes'
-                    sortf_mapf_mts = (None, meses_anio, False)
+                    sortf_mapf_mts = (lambda x: (int(x[0]),), meses_anio, False)
 
                 elif categoria == "donantes":
-                    categories = 'donantesNecesarios'
-                    sortf_mapf_mts = (None, cantidad_donantes, False)
+                    categories = 'categoria_cantidad_donantes'
+                    sortf_mapf_mts = (lambda x: (int(x[0]),), cantidad_donantes, False)
+                    queryset = queryset\
+                        .extra(select={
+                            'categoria_cantidad_donantes':
+                            """
+                                CASE
+                                    when "base_solicituddonacion"."donantesNecesarios"<5 then 1
+                                    when "base_solicituddonacion"."donantesNecesarios">=5 and "base_solicituddonacion"."donantesNecesarios"<10 then 2
+                                    when "base_solicituddonacion"."donantesNecesarios">=10 then 3
+                                END
+                            """
+                        })
 
                 elif categoria == "tipo":
                     categories = 'tipo__nombre'
