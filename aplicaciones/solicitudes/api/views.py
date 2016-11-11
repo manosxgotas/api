@@ -12,6 +12,7 @@ from rest_framework.decorators import api_view
 from rest_framework.status import (
     HTTP_200_OK
     )
+
 from rest_framework.response import Response
 
 from aplicaciones.base.models import (
@@ -25,6 +26,8 @@ from .serializers import (
     TipoSolicitudSerializer,
     SolicitudDonacionListadoSerializer
 )
+
+from .pagination import SolicitudDonacionPagination
 
 from aplicaciones.base.api.permissions import IsOwnerSolicitud
 
@@ -52,15 +55,16 @@ class TipoSolicitudAPI(ListAPIView):
     serializer_class = TipoSolicitudSerializer
 
 
-class SolicitudesInfoAPI(ListAPIView):
+class SolicitudDonacionListAPI(ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = SolicitudDonacionListadoSerializer
     queryset = SolicitudDonacion.objects.all()
+    pagination_class = SolicitudDonacionPagination
 
 
 class SolicitudesDonanteListAPI(ListAPIView):
-    queryset = SolicitudDonacion.objects.all()
     serializer_class = SolicitudDonacionListadoSerializer
+    pagination_class = SolicitudDonacionPagination
 
     def get_queryset(self):
         donante = self.request.user.donante
