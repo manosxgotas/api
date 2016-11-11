@@ -3,7 +3,8 @@ import datetime
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
-    JSONField
+    JSONField,
+    SerializerMethodField
     )
 
 from rest_framework.validators import ValidationError
@@ -23,6 +24,8 @@ from aplicaciones.base.models import (
 from aplicaciones.direcciones.api.serializers import (
     LugarDonacionSerializer
     )
+
+ESTADO_VERIFICADA = 'verificada'
 
 
 def obtener_lugar_donacion(datos_ingresados):
@@ -123,6 +126,12 @@ def create_update_destroy_donacion_serializer(usuario):
             return donacion
 
         def update(self, instance, validated_data):
+            if instance.historicoEstados:
+                ultimo_historico_donacion = instance.historicoEstados.latest('inicio')
+                ultimo_estado = ultimo_historico_donacion.estado.nombre
+                if ultimo_estado.lower() == ESTADO_VERIFICADA:
+                    raise ValidationError('No puedes actualizar la información de una imagen ya verificada.')
+
             instance.fechaHora = validated_data.get('fechaHora', instance.fechaHora)
             instance.descripcion = validated_data.get('descripcion', instance.descripcion)
             instance.estado = validated_data.get('estado', instance.estado)
@@ -147,6 +156,7 @@ def create_update_destroy_donacion_serializer(usuario):
 
 class DonacionSerializer(ModelSerializer):
     lugarDonacion = LugarDonacionSerializer()
+    estado_donacion = SerializerMethodField()
 
     class Meta:
         model = Donacion
@@ -156,12 +166,16 @@ class DonacionSerializer(ModelSerializer):
             'fechaHora',
             'registro',
             'foto',
+            'estado_donacion',
             'imagen_verificacion',
             'lugarDonacion',
-            'historicoEstados',
             'descripcion',
             'estado'
         ]
+
+    def get_estado_donacion(self, obj):
+        ultimo_historico_donacion = obj.historicoEstados.latest('inicio')
+        return ultimo_historico_donacion.estado.nombre
 
 
 class RegistroDonacionSerializer(ModelSerializer):
@@ -182,6 +196,16 @@ class VerificarImagenDonacionSerializer(ModelSerializer):
         fields = [
             'imagen_verificacion'
         ]
+
+    def validate(self, data):
+        donacion = self.instance
+        if donacion.historicoEstados:
+            ultimo_historico_donacion = donacion.historicoEstados.latest('inicio')
+            ultimo_estado = ultimo_historico_donacion.estado.nombre
+            if ultimo_estado.lower() == ESTADO_VERIFICADA:
+                raise ValidationError('No puedes subir una imagen de verificación porque esta donación ya se encuentra verificada.')
+
+        return data
 
     def update(self, instance, validated_data):
         # Obtengo los datos ingresados.

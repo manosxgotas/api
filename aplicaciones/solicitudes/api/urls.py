@@ -4,7 +4,7 @@ from .views import (
     SolicitudDonacionCreateAPI,
     SolicitudDonacionInfoAPI,
     TipoSolicitudAPI,
-    SolicitudesInfoAPI,
+    SolicitudDonacionListAPI,
     SolicitudesDonanteListAPI,
     SolicitudDonacionDeleteAPI,
     cantidad_solicitudes_compatibles
@@ -31,7 +31,7 @@ urlpatterns = [
 
     url(
         r'^listado-solicitudes/$',
-        SolicitudesInfoAPI.as_view(),
+        SolicitudDonacionListAPI.as_view(),
         name='listado-solicitudes'
     ),
     url(

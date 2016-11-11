@@ -3,13 +3,18 @@ import datetime
 from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
-    DestroyAPIView,
     RetrieveAPIView
     )
 
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST
+    )
+
+from rest_framework.serializers import ValidationError
+
+from rest_framework.mixins import (
+        DestroyModelMixin
     )
 
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
@@ -20,7 +25,6 @@ from aplicaciones.base.api.permissions import IsOwnerDonacion
 
 from aplicaciones.base.models import (
     CodigoVerificacion,
-    Donante,
     Donacion,
     EstadoDonacion,
     HistoricoEstadoDonacion,
@@ -32,7 +36,8 @@ from .serializers import (
     create_update_destroy_donacion_serializer,
     DonacionSerializer,
     VerificarImagenDonacionSerializer,
-    RegistroDonacionSerializer
+    RegistroDonacionSerializer,
+    ESTADO_VERIFICADA
     )
 
 
@@ -61,7 +66,7 @@ class DonacionUpdateAPI(UpdateAPIView):
             )
 
 
-class DonacionDestroyAPI(DestroyAPIView):
+class DonacionDestroyAPI(RetrieveAPIView, DestroyModelMixin):
     permission_classes = [IsOwnerDonacion]
     queryset = Donacion.objects.all()
     lookup_field = 'id'
@@ -71,6 +76,16 @@ class DonacionDestroyAPI(DestroyAPIView):
         return create_update_destroy_donacion_serializer(
                 usuario=usuario
             )
+
+    def delete(self, request, *args, **kwargs):
+        donacion = self.get_object()
+        if donacion.historicoEstados:
+            ultimo_historico_donacion = donacion.historicoEstados.latest('inicio')
+            ultimo_estado = ultimo_historico_donacion.estado.nombre
+            if ultimo_estado.lower() == ESTADO_VERIFICADA:
+                raise ValidationError('No puedes eliminar una donación que se encuentre verificada.')
+
+        return self.destroy(request, *args, **kwargs)
 
 
 class DonacionInfoAPI(RetrieveAPIView):

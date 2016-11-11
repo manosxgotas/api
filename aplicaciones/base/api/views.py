@@ -25,6 +25,9 @@ from aplicaciones.base.models import (
     Nacionalidad,
     TipoDocumento
     )
+
+from .pagination import EventoPagination
+
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import AllowAny
 
@@ -55,8 +58,14 @@ class EventoInfoAPI(RetrieveAPIView):
 
 
 class EventoListAPI(ListAPIView):
-    queryset = Evento.objects.all().order_by('-fechaHoraInicio')
+    queryset = Evento.objects.all()
     serializer_class = EventoSerializer
+
+
+class EventoSeccionListAPI(ListAPIView):
+    queryset = Evento.objects.all()
+    serializer_class = EventoSerializer
+    pagination_class = EventoPagination
 
 
 class GrupoSanguineoListAPI(ListAPIView):
