@@ -10,6 +10,7 @@ from .views import (
     NacionalidadListAPI,
     TipoDocumentoListAPI,
     GrupoSanguineoInfoAPI,
+    EventoSeccionListAPI,
     cantidad_eventos_en_curso
     )
 
@@ -24,6 +25,7 @@ urlpatterns = [
     url(r'^centro/(?P<id>\w+)$', CentroDonacionInfoAPI.as_view(), name='detalle-centro'),
     url(r'^evento/(?P<id>\w+)$', EventoInfoAPI.as_view(), name='detalle-evento'),
     url(r'^listado-eventos/$', EventoListAPI.as_view(), name='listado-eventos'),
+    url(r'^listado-seccion-eventos/$', EventoSeccionListAPI.as_view(), name='listado-seccion-eventos'),
 
     url(r'^cantidad-eventos/$', cantidad_eventos_en_curso, name='cantidad-eventos'),
 
